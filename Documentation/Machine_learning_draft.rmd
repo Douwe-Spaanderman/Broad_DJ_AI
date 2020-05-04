@@ -1,0 +1,168 @@
+---
+title: "Machine Learning Draft"
+author:
+- affiliation: Broad Institute of MIT and Harvard
+  name: D J Spaanderman
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  pdf_document:
+    citation_package: natbib
+    fig_caption: yes
+    keep_tex: yes
+    latex_engine: pdflatex
+    template: data/svm-latex-ms.tex
+    toc: yes
+  html_document:
+    df_print: paged
+    toc: yes
+biblio-style: apsr
+endnote: no
+fontfamily: mathpazo
+fontsize: 11pt
+geometry: margin=1in
+header-includes:
+- \usepackage{hyperref}
+- \usepackage{pdflscape}
+- \newcommand{\blandscape}{\begin{landscape}}
+- \newcommand{\elandscape}{\end{landscape}}
+keywords: Cancer cell line, Predicting growth media, Machine learning, AI
+bibliography: data/master.bib
+abstract: This document provides an draft of the machine learning part of my Masters
+  Major Internship, I will start by introducing the subject including some
+  basics about machine learning, what my lab already has achieved and how I will go
+  fourth in achieving our goal; predicting tumor growth media using genomics.
+---
+
+```{r setup, include=FALSE}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(egg)
+knitr::opts_chunk$set(cache=TRUE,
+                      message=FALSE, warning=FALSE,
+                      fig.path='figs/',
+                      cache.path = '_cache/',
+                      fig.process = function(x) {
+                      x2 = sub('-\\d+([.][a-z]+)$', '\\1', x)
+                      if (file.rename(x, x2)) x2 else x
+                      })
+```
+
+# Introduction
+The cancer cell line factory (CCLF) an initiative of the *Broad Institute* focussess on the production of cancer models [@Boehm2015]. These cancer models can be assessed for various aims. First, comprehensively characterizing the genomes of cancer models can infer information such as cancer dependencies, which is currently lacking in rarer types of cancers. Secondly, any lab can have access to these new cancer models enabeling faster and more tuned research. Thirdly, better representing cancer models to patients can improve treatment selection. Lastly, the scale at which these models are created will give us new insights into standardizing research protocals, which will be mainly the focus of this draft. Additionally, several papers have been recently published which use models derived from CCLF [@Hong2016, @Ben-David2017, @Viswanathan2017, @Joung2017].
+
+Due to the nature of different tumor and tissue types, effectively creating these cancer models harnasses many technical difficulties, one of which being the selection of growth media. Therefore, A major bottleneck in current procedures is the required use of media panels as large as 64 different types in order to effectively growth cancer models. By means of trial and error we have narrowed down the candidate growth media's for specific tumor and tissue types which we have grown multiple times over the years. However, rarer and less frequent grown cancer models still requires extensive media panels. In this draft I want to explain our pipeline, several machine learning approaches and hypothesis how we can go about using the genomic information gathered to train machine learning models to predict the best possible growth media.
+
+# Pipeline
+CCLF receives patient samples from clinicians. In our pipeline we currently have a total of 1559 unique patient ID, ranging from the year 2001 till 2019 (based on the cohort dashboard from Tableau). In Figure 1, I have highlighted the top 10 most occuring cancer types in our pipeline out of a total of 223 cancer types. Total frequency for each tumor type in our database can be found in the supplementary table 1. Note, that due to some inconsistency in naming, multiple similar tumor types consists in the database. Additionally, I checked the current use of media types in the top 10 most occuring tumors (Figure 2) and present all the media types including brief explanation in supplementary table 2. Aside from the tumor type, the patient sample can have various biological origins (i.e. tumor site) and can originate from primary or metastasis. Furthermore, technical differences can also exists between samples, such as the way the sample is recieved (i.e. fresh tissue, cryopreserved tissue, frozen tissue etc.), types of biosp used (pleural
+
+\newpage
+\blandscape
+
+```{r, echo=FALSE, eval=TRUE, cache=FALSE, message=F, warning=F, fig.cap="Number of media's tried for top 10 tumor types", fig.fullwidth=TRUE, fig.width=14, fig.height=10}
+tableau_data <- read.csv("data/Cohort_Summary_data.csv", sep='\t', fileEncoding = "UCS-2LE")
+
+unique_PT_ID <- unique(tableau_data$PT.ID)
+unique_PT_ID <- unique_PT_ID[unique_PT_ID != "null"]
+
+diagnosed_table <- tableau_data[tableau_data$Diagnosis != "",]
+
+table_diagnosis <- as.data.frame(table(unique(diagnosed_table[c("PT.ID", "Diagnosis")])$Diagnosis))
+table_diagnosis <- table_diagnosis[-1,]
+
+cbbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7",  "#00CC33",  "#FF0033",  "#660099")
+
+mapped_occurences <- tail(sort(table_diagnosis$Freq), 10)
+mapped_occurences <- data.frame(Freq=mapped_occurences, color=1:10)
+mapped_occurences$pallet <- cbbPalette
+
+table_diagnosis <- merge(table_diagnosis, mapped_occurences, by="Freq", all = TRUE)
+table_diagnosis[is.na(table_diagnosis)] <- 0
+table_diagnosis$pallet <- ifelse(table_diagnosis$color == 0, "#000000", table_diagnosis$pallet)
+table_diagnosis$color <- as.factor(table_diagnosis$color)
+
+top10 <- tail(table_diagnosis, 10)
+table_diagnosis <- table_diagnosis[order(table_diagnosis$Var1),]
+
+p<- ggplot(data=table_diagnosis, aes(x=Var1, y=Freq, fill=color)) + 
+  geom_col() +
+  scale_y_continuous(limits = c(0,max(table_diagnosis$Freq)), expand = c(0, 0)) +
+  theme_bw() +
+  scale_fill_manual(values=append(cbbPalette, "#000000", 0)) +
+  theme(panel.grid = element_blank(),
+        panel.border = element_blank(),
+        axis.text.x = element_text(angle=90, hjust=1, vjust=0.5, colour = table_diagnosis$pallet, size=5),
+        axis.ticks.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),)
+  
+p
+```
+
+\elandscape
+\newpage
+
+```{r, echo=FALSE, eval=TRUE, cache=FALSE, message=F, warning=F, fig.cap="Number of unique patient IDs for each tumor type in the CCLF pipeline", fig.fullwidth=TRUE, fig.width=14, fig.height=10}
+data_figure2 <- tableau_data[tableau_data$Diagnosis %in% top10$Var1,]
+data_figure2 <- data_figure2 %>% select(Diagnosis, Media.type, Status..Resolution) %>% filter(Media.type != "")
+data_figure2 <- data_figure2 %>% select(-Status..Resolution) %>% count(Diagnosis, Media.type) %>% group_by(Diagnosis) %>% mutate(prop = prop.table(n)) %>% mutate(count = sum(n))
+p <- ggplot(data_figure2, aes(x="", prop, fill=Media.type)) + geom_bar(stat="identity", width=1) + coord_polar("y", start=0) + theme_void() + facet_wrap( ~ Diagnosis, nrow=2)
+tag_facet(p, x = 1, y = 1, hjust = 0.5, vjust=7, tag_pool = unique(data_figure2$count), open = "", close = "")
+```
+
+\noindent
+effusion, needle, ascites, etc.) and from which clinician. Together these differences create noise between samples. For instance, it might be that tumor X growth's fine with media Y, however fails due to fact that the starting material was frozen down. It is important to take notes of these artifacts in the data as it can influence how further down the road, our model interpert the data, or might even learn features which are created due to these technical differences. Noteable, growing tumor models is a laborious and difficult task, so even when all conditions are right, the experiment might fail. Additionally, CCLF growths multiple types of cancer models, such as 2D (tradtional cell lines), 3D (organoid) and neurosphere (free floating cluster of cells), which should also be included for distinquishing tumors as these highly influence media condition.
+
+Before we initialize the patient sample, first the DNA is sequenced using a large contig panel (a set of predefined regions). It is important to note that, during the time of CCLF this panel has been extended to include more regions of the genome, introducing either missing data or abundant data respectively for the old and new data if both datasets are aggegrated. Raw sequencing reads are mapped to reference genome GRCh37 and using [GATK V4](https://gatk.broadinstitute.org/hc/en-us) including mutect1/2, copy number variations (CNVs), small nucleotide ploymorphisms (SNPs), insertions and deletions (Indels) are infered. Additionally, germline events are filtered by comparing matching mutations event in blood sample if applicable and filtering previously identified germline events in our pipeline. 
+
+When cancer models are finalized and have been through nurcery, genome and RNA is sequenced and compared to infer resemblance to its original patient sample. Currently, we neither have whole genome sequencing or RNA sequencing data for initial patient sample. Therefore, we could explore the possibility of using cancer model data as a manner of input data for our machine learning model as it is in theory more compleet. Note, that RNA data is timepoint dep endent and that culturing might have influenced the transcriptomics. 
+
+Arguable the most important descision for our media prediction model is the chosen input data. Some general notes to take into account when selecting input data, the higher dimensional the data, the more complex the model requires to be to infer features in this data. Contrary, less preprocessing such as protein pathway analysis or mutation calling has many advantages as an end-to-end model removes the introduction of additional technical noise, reduces analysis time and has better standarization capabilities. In Figure 3, I have depicted a simplified version of our current pipeline and possible input data for our model. This could also include biological data such as tumor type, site and metastasis or primary, however ideally this information is not included as it is often unknown or highly variable. Additionally, multiple data entries could be assessed as input data, however will require a more complex model. For all input possibility I have highlighted challenges and strengths.
+
+![Pipeline of CCLF and possible data type entries for our machine learning application](figs/Diagram.png)
+
+\newpage
+
+- **Raw sequencing reads** would create an end-to-end model without any preprocessing however is far to high dimensional and sparce to use as an input data. Implementation of raw sequencing reads have to my knowlegde not been done in any genomics machine learning model, aside from raw nanopores sequencing signal. On the other hand, mapped sequencing reads have been used for more elaborate tasks such as SNP and Indel calling, but even here this would require a far to complex model (i.e. raw or mapped reads not an option as input data). 
+- **CNV** and/or **SNPs** and/or **Indels** (and/or **Fusions**): with the exception of CNVs, these data entries are very sparce. For example, it could well be that 40 similar tumor types only share 5 somatic variants/Fusions, while all the other data is unique for each sample. An higher overview, such as mutated gene map or protein pathway changes could reduce this limitation. However, would require a number of assumptions, such as identifying important fusion/variant.
+- **RNA** have been reported in other relatable models, see the part literature models. Also, RNA data could better represent metabolic events in the data. However, RNA data is gathered from cancer models, which might have different transcriptomics than their patient sample counterpart.
+
+# Machine learning
+Machine learning algorithms can be roughly divided between supervised and unsupervised methods. In supervised machine learning, labeled data is used to predict the classification or regression of data points. Examples of 'conventional' supervised machine learning algorithms are linear and logistic regression, the random forest classifier and support vector machines (SVM). On the other hand, in unsupervised machine learning, patterns in data are learned without relying on predefined labels. Two examples of unsupervised machine learning are clustering and principal component analysis. Additionally, semi-supervised models, which uses a combinaton of labeled and unlabeled data, in order to limit the required learning data can also be assessed. In our case, we have gathered a fair amount of labeled data in the form of a genomic profile for a patient sample with both succesful and unsuccesful experiments based on culture conditions (i.e. Media). Therefore either a supervised or an semi-supervised model should be assess to predict media condition. A major bottleneck for our model is the high amount of technical noise which consists in these experiments. *"A machine learning model is only as good as the data"* as described by [IBM](http://www.research.ibm.com/5-in-5/ai-and-bias/).
+
+Aside from the input data, model selection is also important. Note that arguable the best way to approach this problem is to trial and error, initialy starting with simpeler models such as a random forest classifier, as most likely data is not linear seperable, ruling out linear regression models and support vector machines. Moving forward to more complex models such as feed-forward networks, convolutional neural networks and recurrent neural networks. These methods are well described in my literature study about Exploring Genomics using Deep Learning (confident but also present in my [GitHub repository](https://github.com/Douwe-Spaanderman/Broad_DJ_AI), please be mindfull when sharing). This review also describes shortly the bascis of deep learning such as back-propogation, activation functions, loss functions, hyperparamaterization, which I won't go into further here as it is an extensive subject. However, on the technical aspect there are several tools we could assess to create the best model for our needs. [scikit-learn](https://scikit-learn.org/stable/) which is an extensive python library can be used for various machine learning algorithms such as random forest, dimensional reduction techniques and preprocessing (feature extraction and normalization). [TensorFlow](https://www.tensorflow.org/) and [Keras](https://keras.io/) respectively low and higher level neural network API's to create deep learning models. Additionally, [Hyperas](https://github.com/maxpumperla/hyperas) and [Talos](https://github.com/autonomio/talos) are hyperparameter optimization algorithms and [DeepReplay](https://github.com/dvgodoy/deepreplay) assist learning visualization.
+
+Aside from these supervised learning models, we could also invest time in dimensional reduction techniques to infer relations in mutation data as a method of pre-processing such as principal component analysis (PCA), autoencoder or generative adversarial network (GAN).
+
+# Literature models
+
+In my literature study, I have described many deep learning approaches in genomics. However, few models are described to achieve similar goals as predicting media conditions from genomic data. Nevertheless, @Lyu2018, et al. describes the use of gene expression data in order to classify tumor types. In order to achieve this goal, RNA data is log2 transformed and compared to Pan-Cancer Atlas in order to reduce the gene panel. Next these gene panels are embedded into a 2D image (102x102), which encodes for gene expression of 10404 important genes. These images are than analyzed using a convolutional neural network. Some things to note with this method, embedding is arguable the most dominant factor in model effectiveness. This is due to the nature of CNNs, as they take spatial dependencies in data into account. Therefore shifting around gene position would greatly impact model accurarcy. The main message we can take from this paper is the method they used to encode their genomic data by selecting important genes from Pan-Cancer Atlas and encoding into a 2D heatmap.
+
+A more recent paper, uses a deep learning approach to classify primary and metastatic cancer using passenger mutation patterns [@Jiao2020]. somatic mutation were preprocessed to extract several features. For each sample, the mutational-type feature was based on counting the number of single nucleotide changes, nucleotide changes plus their 5' and/or 3' flanking nucleotides. Next, these mutational-type feautres were normalized for the total number of SNVs in the sample. The mutational distribution features are the number of SNVs, small indels, structural variation (SV) breakpoints and CNV in 1-megabase bins across the genome, normalized to the corresponding mutational event across the genome. Additional features are the total number of each type of mutational event per genome, number of each type of mutational event per chromosome (normalized for chromosome size), sample purity and sample ploidy. These features were than used in an feed-forward network. Noteable, adding information on driver mutations reduced model accuracy. This paper presents another method of encoding genomic data for our machine learning model.
+
+# Conclusion
+In this paragraph I will discuss the best steps to follow in order to create a model which will be able to infer media condition from genomic data. Currently, the main bottleneck is selecting the type of input data and how to encode this information. Both models reported in the previous segment show promosing methods of encoding genomic data for deep learning approaches. In my opinion, RNA data seems more intuitive as it closer resemblence metabolic features, which are most important for media selection. However I am unsure if the transcriptomics data we have is applicable for predicting media condition as it originates from cancer models instead of patient sample. On the other hand, we have more abundant mutation data from patient sample. Preprocessing would be a more elaborate task when assessing mutation data. Similar to the paper described in the previous segment, we could encode mutation data in features. In contrast, we could encode mutation data as higher level structures such as gene level (i.e. gene x has y mutation data) or even in an protein pathway (i.e. pathway x has gene y with z mutation data). This would reduce the effect of sparseness in mutation data, however would require a fair amount of assumptions, such as which pathway/gene to feed the network, if and how to include functional mutation annotation. In order to create a working machine learning model several steps have to be conducted:
+
+1. Aggegrating compleet datasets, ideally a Terra workspace in which data is cleaned and displayed as Patient ID X - Biological/technical information (i.e. primary-biopsy-type etc.) - Raw/mapped reads - CNV - SNV/indels - Media types (csv file with all media types + succes rates for each type) - linked cancer model id - WGS (incl CNV/SNV) - RNA
+2. Encoding either mutation information or transcriptomics based on feedback from Remi/Moony
+3. Segregation of training, test and validation dataset
+4. Building, training and validating machine learning algorithm
+5. Blackbox features extraction. This is something very promising if the algorithm works. It would possibly give insight into why a certian mutational/transcriptomics landscape prefers a set media type.
+
+Something to note is that ideally I would like to access all the created cancer models, by removing any predefined information such as tumor type and site. However, it also might be worthwhile to reduce noise by removing tumors types which are only few in our pipeline (<5).
+
+
+\newpage
+# Supplementary
+```{r, message=FALSE, results = 'asis', echo=FALSE, warning=FALSE}
+printable_table <- table_diagnosis %>% select(Freq:Var1) %>% rename(
+  'Number of times reported'=Freq,
+  'Tumor type'=Var1
+)
+knitr::kable(printable_table, row.names = FALSE)
+```
+
+Table 1 : Frequency table of the occurence of tumor types in our pipeline, take note that some naming issues are currently present in our pipeline, such as stomach adenocarcinoma and stomach adenocarcinoma [stad], which should be considered the same, therefore cleaning of the data should be conducted to aggegrate these results together, either by manually (cleaner) or artificially (faster) mapping these tumor types.
+
+
+
