@@ -453,6 +453,25 @@ feed-forward network. Noteable, adding information on driver mutations
 reduced model accuracy. This paper presents another method of encoding
 genomic data for our machine learning model.
 
+Similar to the previous paper, another approach is described by
+\citet{Sun2019}, et al., which aim to identify and distinquish 12 cancer
+types through whole exome sequencing with a feed-forward network. As
+described in the paper and in previous segments, it is impractical to
+select all of the point mutations for the model as it will increase the
+computational cost and learning difficulity. Therefore they select point
+mutations closely related to cancer from TCGA and ranked them on
+occurrence in this cancer group from high to low. In total the selected
+10000 point mutations as the input dimension, this is a sort of
+preprocessing step in which already features are extracted from the
+data. Note that the selection of point mutations is very important.
+Also, in our case mutations that are important might be different then
+those reported in TCGA. For instance, a mutation could be a driver
+mutation for cancer (therefore reported often in TCGA), but in our case
+a passenger mutation (not often reported TCGA) might have an high impact
+on media condition. Something else to note is that the dataset used here
+was comprised of in total 6083 samples, consisting of these 12 cancer
+types, as well as \textasciitilde{}2000 healthy samples.
+
 \hypertarget{conclusion}{%
 \section{Conclusion}\label{conclusion}}
 
