@@ -420,20 +420,38 @@ as a method of pre-processing such as principal component analysis
 
 In my literature study, I have described many deep learning approaches
 in genomics. However, few models are described to achieve similar goals
-as predicting media conditions from genomic data. Nevertheless,
-\citet{Lyu2018}, et al.~describes the use of gene expression data in
-order to classify tumor types. In order to achieve this goal, RNA data
-is log2 transformed and compared to Pan-Cancer Atlas in order to reduce
-the gene panel. Next these gene panels are embedded into a 2D image
-(102x102), which encodes for gene expression of 10404 important genes.
-These images are than analyzed using a convolutional neural network.
-Some things to note with this method, embedding is arguable the most
-dominant factor in model effectiveness. This is due to the nature of
-CNNs, as they take spatial dependencies in data into account. Therefore
-shifting around gene position would greatly impact model accurarcy. The
-main message we can take from this paper is the method they used to
-encode their genomic data by selecting important genes from Pan-Cancer
-Atlas and encoding into a 2D heatmap.
+as predicting media conditions from genomic data. The closest relatable
+study in term of using genomic data to predict a certain condition, is
+its use in predicting tumor type or subclasses. The first example of
+this is the paper from \citet{Lyu2018}, et al., which describes the use
+of gene expression data in order to classify tumor types. In order to
+achieve this goal, RNA data is log2 transformed and compared to
+Pan-Cancer Atlas in order to reduce the gene panel. Next these gene
+panels are embedded into a 2D image (102x102), which encodes for gene
+expression of 10404 important genes. These images are than analyzed
+using a convolutional neural network. Some things to note with this
+method, embedding is arguable the most dominant factor in model
+effectiveness. This is due to the nature of CNNs, as they take spatial
+dependencies in data into account. Therefore shifting around gene
+position would greatly impact model accurarcy. The main message we can
+take from this paper is the method they used to encode their genomic
+data by selecting important genes from Pan-Cancer Atlas and encoding
+into a 2D heatmap. Personally, I do not think a 2D CNN approach is the
+best method to apply, as spatial dependencies in the data is highly
+dependent on the way this input image is created. In the paper, images
+are created by ordering genes based on position and following reshaping
+of an array into a 102x102. The thought process, would be that adjecent
+genes are most likely to interact with each other. Howevr, from a
+biological mindset, I believe spatial dependencies do not or atleast
+minimally apply in RNA data. For instance, an important pathway for cell
+survical, the MAPK/ERK pathway, has protein encoding regions all over
+the genome, with minimal proximity between genes (note that as the
+paper, this is disregarding any 3D genome structures). Another paper,
+which also uses RNA sequencing uses a similar method of selecting
+expression data of a specific set of genes and encoding it into an
+single dimension array as input for an feed-forward network to predict
+cancer molecular subtypes \citep{Gao2019}. I think that it would be a
+valuable effort to try both these approaches.
 
 A more recent paper, uses a deep learning approach to classify primary
 and metastatic cancer using passenger mutation patterns
@@ -471,6 +489,13 @@ a passenger mutation (not often reported TCGA) might have an high impact
 on media condition. Something else to note is that the dataset used here
 was comprised of in total 6083 samples, consisting of these 12 cancer
 types, as well as \textasciitilde{}2000 healthy samples.
+
+\begin{figure}
+\centering
+\includegraphics{figs/Papers.png}
+\caption{Summary of the current implementations of deep learning
+approaches in similar aims as ours}
+\end{figure}
 
 \hypertarget{conclusion}{%
 \section{Conclusion}\label{conclusion}}
