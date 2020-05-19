@@ -62,6 +62,7 @@ data_figure2 <- data_figure2 %>% select(Diagnosis, Media.type, Status..Resolutio
 #Freq_table <- data_figure2 %>% count(Media.type, Diagnosis, Status..Resolution, name="n2") %>% group_by(Diagnosis) %>% mutate(prop_verified = prop.table(n2)) %>% filter(Status..Resolution == "Verified Tumor") %>% select(-Status..Resolution, -n2)
 #data_figure2 <- data_figure2 %>% select(-Status..Resolution) %>% count(Diagnosis, Media.type) %>% group_by(Diagnosis) %>% mutate(prop = prop.table(n)) %>% mutate(ypos = cumsum(prop)- 0.5*prop ) %>% left_join(Freq_table) %>% replace(is.na(.), 0)
 data_figure2 <- data_figure2 %>% select(-Status..Resolution) %>% count(Diagnosis, Media.type) %>% group_by(Diagnosis) %>% mutate(prop = prop.table(n)) %>% mutate(count = sum(n))
-p <- ggplot(data_figure2, aes(x="", prop, fill=Media.type)) + geom_bar(stat="identity", width=1) + coord_polar("y", start=0) + theme_void() + facet_wrap( ~ Diagnosis, nrow=2)
+p <- ggplot(data_figure2, aes(x="", prop, fill=Media.type)) + geom_bar(stat="identity", width=1) + coord_polar("y", start=0) + theme_void() + facet_wrap( ~ Diagnosis, nrow=2) +
 tag_facet(p, x = 1, y = 1, hjust = 0.5, vjust=7, tag_pool = unique(data_figure2$count), open = "", close = "")
-
+p
+tag_facet(p, x = 1, y = 1, hjust = 0.5, vjust=7, tag_pool = unique(data_figure2$count), open = "", close = "")
