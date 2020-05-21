@@ -2,6 +2,7 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(egg)
+library(gridExtra)
 
 tableau_data <- read.csv("Documentation/data/Cohort_Summary_data.csv", sep='\t', fileEncoding = "UCS-2LE")
 
@@ -66,3 +67,72 @@ p <- ggplot(data_figure2, aes(x="", prop, fill=Media.type)) + geom_bar(stat="ide
 tag_facet(p, x = 1, y = 1, hjust = 0.5, vjust=7, tag_pool = unique(data_figure2$count), open = "", close = "")
 p
 tag_facet(p, x = 1, y = 1, hjust = 0.5, vjust=7, tag_pool = unique(data_figure2$count), open = "", close = "")
+
+# Figures Terra data
+spreedsheet_small <- read.csv("Documentation/data/spreadsheet_small.tsv", sep='\t', fileEncoding = "utf-8")
+
+# Panel
+data_figure3 <- spreedsheet_small[spreedsheet_small["PANEL_renamed_bai_file"] != "nan",]
+#P1
+data_figure3_p1 <- as.data.frame(table(data_figure3["PANEL_renamed_bai_file"]))
+data_figure3_p1 <- data.frame(type=c("all", "unique"), y=c(sum(data_figure3_p1$Freq), length(data_figure3_p1$Var1)))
+p1<- ggplot(data=data_figure3_p1, aes(x=type, y=y)) + 
+  geom_col() +
+  theme_bw() +
+  theme(panel.grid = element_blank(),
+        panel.border = element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),)
+
+#P2
+data_figure3_p2 <- as.data.frame(table(data_figure3["Growth"]))
+p2 <- ggplot(data=data_figure3_p2, aes(x="", y=Freq, fill=Var1)) + geom_bar(stat="identity", width=1) + coord_polar("y", start=0) + theme_void()
+
+#P3
+data_figure3_p3 <- as.data.frame(table(data_figure3["Dataset"]))
+### Why is this necessary?
+data_figure3_p3 <- data_figure3_p3[data_figure3_p3["Var1"] != "",]
+p3 <- ggplot(data=data_figure3_p3, aes(x="", y=Freq, fill=Var1)) + geom_bar(stat="identity", width=1) + coord_polar("y", start=0) + theme_void()
+
+#P4
+data_figure3_p4 <- as.data.frame(table(data_figure3["Media.type"]))
+p4 <- ggplot(data=data_figure3_p4, aes(x="", y=Freq, fill=Var1)) + geom_bar(stat="identity", width=1) + coord_polar("y", start=0) + theme_void()
+
+#P5
+data_figure3_p5 <- as.data.frame(table(data_figure3["Primary.Disease"]))
+data_figure3_p5 <- data_figure3_p5[data_figure3_p5["Var1"] != "",]
+p5 <- ggplot(data=data_figure3_p5, aes(x="", y=Freq, fill=Var1)) + geom_bar(stat="identity", width=1) + coord_polar("y", start=0) + theme_void()
+
+#P6
+data_figure3_p6 <- as.data.frame(table(data_figure3["Dimension"]))
+data_figure3_p6 <- data_figure3_p6[data_figure3_p6["Var1"] != "",]
+p6 <- ggplot(data=data_figure3_p6, aes(x="", y=Freq, fill=Var1)) + geom_bar(stat="identity", width=1) + coord_polar("y", start=0) + theme_void()
+
+grid.arrange(p1, p2, p3, ncol=3, nrow=1)
+
+# RNA
+data_figure4 <- spreedsheet_small[spreedsheet_small["RNA_fastq1"] != "nan",]
+
+data_figure4_p1 <- as.data.frame(table(data_figure4["RNA_fastq1"]))
+data_figure4_p1 <- data.frame(type=c("all", "unique"), y=c(sum(data_figure4_p1$Freq), length(data_figure4_p1$Var1)))
+p1<- ggplot(data=data_figure4_p1, aes(x=type, y=y)) + 
+  geom_col() +
+  theme_bw() +
+  theme(panel.grid = element_blank(),
+        panel.border = element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),)
+
+#P2
+data_figure4_p2 <- as.data.frame(table(data_figure4["Growth"]))
+p2 <- ggplot(data=data_figure4_p2, aes(x="", y=Freq, fill=Var1)) + geom_bar(stat="identity", width=1) + coord_polar("y", start=0) + theme_void()
+
+#P3
+data_figure4_p3 <- as.data.frame(table(data_figure4["Dataset"]))
+### Why is this necessary?
+data_figure4_p3 <- data_figure4_p3[data_figure4_p3["Var1"] != "",]
+p3 <- ggplot(data=data_figure4_p3, aes(x="", y=Freq, fill=Var1)) + geom_bar(stat="identity", width=1) + coord_polar("y", start=0) + theme_void()
+
+grid.arrange(p1, p2, p3, ncol=3, nrow=1)
