@@ -89,6 +89,16 @@ p1<- ggplot(data=data_figure3_p1, aes(x=type, y=y)) +
 data_figure3_p2 <- as.data.frame(table(data_figure3["Growth"]))
 p2 <- ggplot(data=data_figure3_p2, aes(x="", y=Freq, fill=Var1)) + geom_bar(stat="identity", width=1) + coord_polar("y", start=0) + theme_void()
 
+data_figure3_p2 <- as.data.frame(table(data_figure3["Growth"]))
+p2 <- ggplot(data=data_figure3_p2, aes(x=Var1, y=Freq, fill=Var1)) + 
+  geom_col() +
+  theme_bw() +
+  theme(panel.grid = element_blank(),
+        panel.border = element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),)
+
 #P3
 data_figure3_p3 <- as.data.frame(table(data_figure3["Dataset"]))
 ### Why is this necessary?
@@ -129,6 +139,17 @@ p1<- ggplot(data=data_figure4_p1, aes(x=type, y=y)) +
 data_figure4_p2 <- as.data.frame(table(data_figure4["Growth"]))
 p2 <- ggplot(data=data_figure4_p2, aes(x="", y=Freq, fill=Var1)) + geom_bar(stat="identity", width=1) + coord_polar("y", start=0) + theme_void()
 
+data_figure4_p2 <- as.data.frame(table(data_figure4["Growth"]))
+p2 <- ggplot(data=data_figure4_p2, aes(x=Var1, y=Freq, fill=Var1)) + 
+  geom_col() +
+  theme_bw() +
+  theme(panel.grid = element_blank(),
+        panel.border = element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),)
+
+
 #P3
 data_figure4_p3 <- as.data.frame(table(data_figure4["Dataset"]))
 ### Why is this necessary?
@@ -136,3 +157,5 @@ data_figure4_p3 <- data_figure4_p3[data_figure4_p3["Var1"] != "",]
 p3 <- ggplot(data=data_figure4_p3, aes(x="", y=Freq, fill=Var1)) + geom_bar(stat="identity", width=1) + coord_polar("y", start=0) + theme_void()
 
 grid.arrange(p1, p2, p3, ncol=3, nrow=1)
+
+
