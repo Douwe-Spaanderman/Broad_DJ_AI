@@ -127,7 +127,7 @@ def plotting(heatmap_media, heatmap_supplements, Scale="log2", save=False, show=
         heatmap_media = heatmap_media.div(heatmap_media.sum(axis=1), axis=0)
         heatmap_supplements = heatmap_supplements.div(heatmap_supplements.sum(axis=1), axis=0)
     else:
-        warnings.warn('unrecognized scale was provided for plotting: {Scale}, therefore data has not been changed')
+        warnings.warn(f'unrecognized scale was provided for plotting: {Scale}, therefore data has not been changed')
 
     width_ratio = len(heatmap_media.columns)/len(heatmap_supplements.columns)
 
@@ -217,7 +217,7 @@ def heatmap_media_matrix(data, Path=False, Order="Occurence", Scale="log2", save
         tmp_supplement_data = Cluster_order(supplement_data)
         plotting(tmp_media_data, tmp_supplement_data, save=save, show=show, extention="clustering_")
     else:
-        raise KeyError("Wrong Order was provided: {Order}, please pick either Occurence, Clustered, Nothing, All.")
+        raise KeyError(f"Wrong Order was provided: {Order}, please pick either Occurence, Clustered, Nothing, All.")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Change media encoding")

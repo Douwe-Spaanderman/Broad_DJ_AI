@@ -46,7 +46,7 @@ def filter_nan_sequence(data, selection="PANEL"):
         elif selection.upper() == "ALL":
             data = data[(data["PANEL_renamed_bai_file"] != 'nan') & (data["RNA_fastq1"] != 'nan')]
         else:
-            raise NameError("Implemented unused argument for filtering data, input was {}, but should be panel/wes/rna/all".format(selection))
+            raise NameError(f"Implemented unused argument for filtering data, input was {selection}, but should be panel/wes/rna/all")
     else:
         raise TypeError("filter_nan_sequencing was provided with a {}, while it should be a string".format(type(selection)))
 

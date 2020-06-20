@@ -208,7 +208,7 @@ def one_hot_media(media_content: GrowthMedium, all_medium:list, all_supplements:
             Supplement_one_hot(suple_array, all_supplements)
         )
     else:
-        raise KeyError("Wierd instance of percentage option was given for one_hot_media: {percentage}")
+        raise KeyError(f"Wierd instance of percentage option was given for one_hot_media: {percentage}")
 
     return current_one_hot
 
