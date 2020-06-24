@@ -99,6 +99,23 @@ def clean_frame(maf_frame):
                             "tumor_f"]]
     return maf_frame
 
+def mutation_filter(data, classification_filter=True, ensembl_filter=False):
+    '''
+    mutation filter to filter out based on classification done in the maf file. Note that both filters generally use the same filtering, but
+    I would advise to use default, because it is more standardized.
+
+    input:
+    
+
+    '''
+    if classification_filter == True:
+        data = data[~data["Variant_Classification"].isin(["Intron", "lincRNA", "IGR", "5'Flank", "5'UTR", "Silent", "3'UTR", "RNA"])]
+    
+    if classification_filter == True:
+        data = data[~data["Ensembl_so_term"].isin(["intron_variant", "intergenic_variant", "upstream_gene_variant", "5_prime_UTR_variant", "synonymous_variant", "3_prime_UTR_variant", ""])]  
+
+    return data
+
 #Create one-hot encoding for genes
 def one_hot_encoder(data, all_genes:list, all_alterations:list):
     '''
@@ -135,7 +152,7 @@ def one_hot_encoder(data, all_genes:list, all_alterations:list):
     #Create classes
     return flat, all_alt, all_alt_2D
 
-def main_maf(directory, Save=False, Show=True):
+def main_maf(directory, filter_protein_coding=False, classification_filter=True, ensembl_filter=False, Save=False, Show=True):
     '''
 
     '''
@@ -153,7 +170,7 @@ def main_maf(directory, Save=False, Show=True):
         maf_frame, file_name = maf_extract(path)
 
         print("now doing: {}".format(file_name))
-        maf_frame = maf_frame.apply(filter_frame, cutoff=0, axis=1)
+        maf_frame = maf_frame.apply(filter_frame, cutoff=0, filter_protein_coding=filter_protein_coding, axis=1)
 
         if type(maf_frame) == pd.core.series.Series or maf_frame.empty == True:
             print(f"{file_name} has no mutations that made tumor fraction cutoff")
@@ -167,6 +184,7 @@ def main_maf(directory, Save=False, Show=True):
             print(f'done {idx+1} out of {number_of_files}')
 
     data = pd.concat(data)
+    data = mutation_filter(data, classification_filter, ensembl_filter)
     
     # Now create one-hot
     data_summary = []
@@ -195,13 +213,13 @@ def main_maf(directory, Save=False, Show=True):
             print(f'done {i+1} out of {len(unique_names)}')
 
     data_summary = pd.concat(data_summary)
+
     
     if Save != False:
         if not Save.endswith(".pkl"):
             Save = Save + "maf_extract.pkl"
             
-        Save_summary = "/".join(["_summary.".join(x.split(".")) if i+1 == len(test.split("/")) else x for i, x in enumerate(test.split("/"))])
-        print(Save_summary)
+        Save_summary = "/".join(["_summary.".join(x.split(".")) if i+1 == len(Save.split("/")) else x for i, x in enumerate(Save.split("/"))])
         data.to_pickle(Save)
         data_summary.to_pickle(Save_summary)
 

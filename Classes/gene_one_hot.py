@@ -21,8 +21,13 @@ class one_hot:
         levels = np.array([str(x) + ":::" + str(y) for x in self.levels[0] for y in self.levels[1]])
         return one_hot(counts, levels)
         
-    def make_2D(self, size):
+    def make_2D(self, size:int):
         counts = self.counts.reshape(int(len(self.counts)/size), size)
         xlist,ylist = zip(*[x.split(":::") for x in self.levels])
         levels = np.array([list(OrderedDict.fromkeys(xlist)), list(OrderedDict.fromkeys(ylist))])
+        return one_hot(counts, levels)
+    
+    def drop(self, index:list):
+        counts = np.delete(self.counts, index)
+        levels = np.delete(self.levels, index)
         return one_hot(counts, levels)

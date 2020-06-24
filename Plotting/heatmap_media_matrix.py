@@ -220,7 +220,7 @@ def heatmap_media_matrix(data, Path=False, Order="Occurence", Scale="log2", save
         raise KeyError(f"Wrong Order was provided: {Order}, please pick either Occurence, Clustered, Nothing, All.")
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Change media encoding")
+    parser = argparse.ArgumentParser(description="Heatmap matrix of media and supplements in samples")
     parser.add_argument("Path", help="path to terra workspace filtered file after media.py")
     parser.add_argument("-s", dest="Save", nargs='?', default=False, help="location of file")
     parser.add_argument("-d", dest="Show", nargs='?', default=True, help="Do you want to show the plot?")
