@@ -15,7 +15,7 @@ from tensorflow.keras.models import Sequential
 from hyperas import optim
 from hyperas.distributions import choice, uniform
 
-def data():
+def data_2():
     """
     Data providing function:
 
@@ -28,31 +28,35 @@ def data():
     X = np.array(data['input_data_supplements'])
     y = np.array(data['output_data_supplements'])
 
+    #X = np.array(data['input_data_neural'])
+    #y = np.array(data['output_data_neural'])
+
+
     x_train, x_test, y_train , y_test = train_test_split(X, y, 
                                                      test_size=0.2, random_state=0)
 
     return x_train, y_train, x_test, y_test
 
-#def data(Path='../Data/Ongoing/result.json'):
-#    """
-#    Data providing function:
-#
-#    This function is separated from create_model() so that hyperopt
-#    won't reload data for each evaluation run.
-#    """
-#    if not Path.endswith(".json"):
-#        Path = Path + "result.json"
-#
-#    with open(Path) as json_file:
-#        data = json.load(json_file)
-#
-#    X = np.array(data['input_data_supplements'])
-#    y = np.array(data['output_data_supplements'])
-#
-#    x_train, x_test, y_train , y_test = train_test_split(X, y, 
-#                                                     test_size=0.2, random_state=0)
+def data(Path='../Data/Ongoing/result.json'):
+    """
+    Data providing function:
 
-#    return x_train, y_train, x_test, y_test
+    This function is separated from create_model() so that hyperopt
+    won't reload data for each evaluation run.
+    """
+    if not Path.endswith(".json"):
+        Path = Path + "result.json"
+
+    with open(Path) as json_file:
+        data = json.load(json_file)
+
+    X = np.array(data['input_data_supplements'])
+    y = np.array(data['output_data_supplements'])
+
+    x_train, x_test, y_train , y_test = train_test_split(X, y, 
+                                                     test_size=0.2, random_state=0)
+
+    return x_train, y_train, x_test, y_test
 
 def create_model(x_train, y_train, x_test, y_test):
     """
@@ -85,6 +89,9 @@ def create_model(x_train, y_train, x_test, y_test):
     model.add(Dense(1))
     model.add(Activation('sigmoid'))
 
+    #model.add(Dense(1))
+    #model.add(Activation('Softmax'))
+
     model.compile(loss='binary_crossentropy', metrics=['accuracy'],
                   optimizer={{choice(['rmsprop', 'adam', 'sgd'])}})
 
@@ -106,14 +113,14 @@ if __name__ == '__main__':
     start = time.time()
 
     best_run, best_model = optim.minimize(model=create_model,
-                                          data=data,
+                                          data=data_2,
                                           algo=tpe.suggest,
                                           max_evals=100,
                                           trials=Trials())
 
     print(args.Path)
-    #X_train, Y_train, X_test, Y_test = data(args.Path)
-    X_train, Y_train, X_test, Y_test = data()
+    X_train, Y_train, X_test, Y_test = data(args.Path)
+    #X_train, Y_train, X_test, Y_test = data()
     print("Evalutation of best performing model:")
     print(best_model.evaluate(X_test, Y_test))
     print("Best performing model chosen hyper-parameters:")
@@ -131,5 +138,3 @@ if __name__ == '__main__':
 
     end = time.time()
     print('completed in {} seconds'.format(end-start))
-
-    

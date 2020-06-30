@@ -31,7 +31,8 @@ def extract_data(data):
     '''
     #Create an empty numpy array for the heatmap in which to count occurences
     # First get all disease types and all media/supplements
-    disease_types = list(set(data["Primary_Disease"]))
+    #disease_types = list(set(data["Primary_Disease"]))
+    disease_types = list(set(data["Lowest Level"]))
     disease_types = sorted([x for x in disease_types if not str(x) == "nan"])
     
     all_media = sorted(list(set().union(*(d.keys() for d in [x.media for x in data["media_class"]]))))
@@ -42,7 +43,9 @@ def extract_data(data):
     
     # Loop for each disease:
     for i, disease in enumerate(disease_types):
-        tmp_data = data[data["Primary_Disease"] == disease]
+        #tmp_data = data[data["Primary_Disease"] == disease]
+        tmp_data = data[data["Lowest Level"] == disease]
+        
         if not tmp_data.empty:
             #Get all keys
             media = [list(x.media.keys()) for x in tmp_data["media_class"]]
@@ -103,6 +106,10 @@ def Count_order(heatmap_data):
     # Count max values for media and use ascending sort
     heatmap_data = heatmap_data.loc[:, heatmap_data.sum().sort_values(ascending=False).index]
 
+    heatmap_data["SUM"] = list(heatmap_data.sum(axis=1))
+    heatmap_data = heatmap_data.sort_values("SUM", ascending=False)
+    heatmap_data = heatmap_data.drop(['SUM'], axis=1)
+
     return heatmap_data
 
 def plotting(heatmap_media, heatmap_supplements, Scale="log2", save=False, show=True, extention=""):
@@ -144,22 +151,10 @@ def plotting(heatmap_media, heatmap_supplements, Scale="log2", save=False, show=
         fontsize=9,
     )
 
-    media_plot.set_title(
-        label='Media:\n',
-        loc="left",
-        fontsize=20, 
-    )
-
     suple_plot.set_xticklabels(
         list(heatmap_supplements.columns), 
         horizontalalignment='center',
         fontsize=9,
-    )
-
-    suple_plot.set_title(
-        label='Supplements:\n',
-        loc="left",
-        fontsize=20, 
     )
 
     f.tight_layout()
@@ -190,6 +185,7 @@ def heatmap_media_matrix(data, Path=False, Order="Occurence", Scale="log2", save
             Path = Path + "after_media.pkl"
         
         data = pd.read_pickle(Path)
+        data = data[data["Lowest Level"] != "Need more information (is it possible to know which case? so we can find out from collaborators)"]
     
     media_data, supplement_data = extract_data(data)
 

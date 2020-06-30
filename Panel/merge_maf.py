@@ -61,7 +61,7 @@ input_data_neural = np.vstack([x.counts for x in data["Flat_one_hot"]])
 output_data_neural = data.apply(lambda x: np.append(x["one-hot"].media.counts, x["Growth"]), axis=1)
 output_data_neural = np.vstack(output_data_neural)
 
-data_terra = {"input_data": input_data.tolist(), "output_.tolist()data": output_data.tolist(), "input_data_neural": input_data_neural.tolist(), "output_data_neural":output_data_neural.tolist()}
+data_terra = {"input_data": input_data.tolist(), "output_data": output_data.tolist(), "input_data_neural": input_data_neural.tolist(), "output_data_neural":output_data_neural.tolist()}
 
 import json
 with open('../Data/Ongoing/result.json', 'w') as fp:

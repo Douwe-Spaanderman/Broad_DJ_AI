@@ -33,7 +33,7 @@ def load_data(Path, supplements=True, test_size=0.2, random_state=None):
         Y = np.array(data['output_data'])
 
     x_train, x_test, y_train , y_test = train_test_split(X, Y, 
-                                                     test_size=test_size, random_state=None)
+                                                     test_size=test_size, random_state=random_state)
 
     return x_train, y_train, x_test, y_test
 
@@ -49,7 +49,7 @@ def grid_train_model(x_train, y_train, imbalance=False, random_state=None, cores
         raise KeyError(f"Imbalance was provided with {imbalance}, please use False or True (bool)")
 
     # StratifiedKFold
-    skf = StratifiedKFold(n_splits=6, shuffle=True, random_state=None)
+    skf = StratifiedKFold(n_splits=6, shuffle=True, random_state=random_state)
 
     grid_search = GridSearchCV(estimator = model, param_grid = param_grid, 
                           cv = skf, n_jobs = cores, verbose = 2)
@@ -81,6 +81,7 @@ def predict_model(x_test, y_test, model):
 
     '''
     predictions = model.predict(x_test)
+    predictions_proba = model.predict_proba(x_test)
 
     print("Prediction for model")
     print(confusion_matrix(y_test, predictions))
@@ -90,8 +91,7 @@ def predict_model(x_test, y_test, model):
     print(f'Accuracy score: {accuracy_score(y_test, predictions)*100:.2f}%')
     print(f"Balanced accuracy score : {balanced_accuracy_score(y_test, predictions)*100:.2f}%")
 
-    predictions = pd.DataFrame({"Predictions":predictions.tolist(), "True_labels":y_test.tolist()})
-
+    predictions = pd.DataFrame({"Predictions":predictions.tolist(), "True_labels":y_test.tolist(), "Probability_0": predictions_proba[:,0], "Probability_1":predictions_proba[:,1]})
     return predictions
 
 if __name__ == '__main__':
