@@ -12,6 +12,8 @@ output:
     latex_engine: pdflatex
     template: data/svm-latex-ms.tex
     toc: yes
+  word_document:
+    toc: yes
   html_document:
     df_print: paged
     toc: yes
@@ -28,9 +30,9 @@ header-includes:
 keywords: Cancer cell line, Predicting growth media, Machine learning, AI
 bibliography: data/master.bib
 abstract: This document provides an draft of the machine learning part of my Masters
-  Major Internship, I will start by introducing the subject including some
-  basics about machine learning, what my lab already has achieved and how I will go
-  fourth in achieving our goal; predicting tumor growth media using genomics.
+  Major Internship, I will start by introducing the subject including some basics
+  about machine learning, what my lab already has achieved and how I will go fourth
+  in achieving our goal; predicting tumor growth media using genomics.
 ---
 
 ```{r setup, include=FALSE}
@@ -168,5 +170,9 @@ knitr::kable(printable_table, row.names = FALSE)
 
 Table 1 : Frequency table of the occurence of tumor types in our pipeline, take note that some naming issues are currently present in our pipeline, such as stomach adenocarcinoma and stomach adenocarcinoma [stad], which should be considered the same, therefore cleaning of the data should be conducted to aggegrate these results together, either by manually (cleaner) or artificially (faster) mapping these tumor types.
 
-
-
+|                    |       Positive      |       Negative      |   $Precision$/$Recall$          |     $Accuracy$/$F_{1} Score$      |
+|:------------------:|:-------------------:|:-------------------:|:-------------------:|:-------------------:|
+|Predicted  |  True Positive   | False Positive  |      $\frac{TP}{TP + FP}$     |                      $\frac{TP + TN}{Total}$                   |
+|Positive                    |        (TP)            |     (FP)                |  |                            |
+|Predicted | False Positive   |  True Negative  |      $\frac{TP}{TP + FN}$        |                      $\frac{Precision * Recall}{Precision + Recall}*2$                   |
+|Negative  | (FP)  |  (TN)  |              |                                         |

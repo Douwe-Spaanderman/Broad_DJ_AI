@@ -7,7 +7,11 @@ import os
 
 def gsutil(link, Save="../Data/Panel/."):
     '''
-
+    Download gsutil link
+    
+    input:
+    link = link to google bucket
+    Save = location for item to be saved
     '''
     os.system(f'gsutil cp {link} {Save}')
 
