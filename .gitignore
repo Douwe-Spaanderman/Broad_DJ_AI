@@ -2,3 +2,9 @@ Documentation/data/*
 Documentation/figs/*
 Data/*
 .Rproj.user
+.DS_Store
+.RData
+.Rhistory
+.ipynb_checkpoints/*
+BroadAI.code-workspace
+Broad_DJ_AI.Rproj
