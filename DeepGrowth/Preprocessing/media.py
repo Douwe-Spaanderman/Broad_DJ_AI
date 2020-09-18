@@ -12,7 +12,7 @@ import warnings
 
 # Currently use sys to get other script
 import sys
-sys.path.insert(1, "../Classes/")
+sys.path.insert(1, "/Users/dspaande/Documents/GitProjects/Broad_DJ_AI/DeepGrowth/Classes/")
 from media_class import Medium, Supplement, GrowthMedium, Medium_one_hot, Supplement_one_hot, GrowthMedium_one_hot
 
 # Split by ',', it will give all media. Then if one has '_' it contains supplement
@@ -212,7 +212,7 @@ def one_hot_media(media_content: GrowthMedium, all_medium:list, all_supplements:
 
     return current_one_hot
 
-def main_media(data, Path=False, Save=False, Encoding="Extract"):
+def media(data, Path=False, Save=False, Encoding="Extract"):
     '''
     Main script to run the changing of media. First creates
 
@@ -258,6 +258,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     start = time.time()
-    data = main_media(data=False, Path=args.Path, Save=args.Save, Encoding=args.Encoding)
+    data = media(data=False, Path=args.Path, Save=args.Save, Encoding=args.Encoding)
     end = time.time()
     print('completed in {} seconds'.format(end-start))

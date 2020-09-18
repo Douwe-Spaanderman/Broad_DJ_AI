@@ -22,7 +22,7 @@ def data_2():
     This function is separated from create_model() so that hyperopt
     won't reload data for each evaluation run.
     """
-    with open('../Data/Ongoing/result.json') as json_file:
+    with open('../../Data/Ongoing/result.json') as json_file:
         data = json.load(json_file)
 
     X = np.array(data['input_data_supplements'])
@@ -37,7 +37,7 @@ def data_2():
 
     return x_train, y_train, x_test, y_test
 
-def data(Path='../Data/Ongoing/result.json'):
+def data(Path='../../Data/Ongoing/result.json'):
     """
     Data providing function:
 
@@ -52,6 +52,8 @@ def data(Path='../Data/Ongoing/result.json'):
 
     X = np.array(data['input_data_supplements'])
     y = np.array(data['output_data_supplements'])
+    #X = np.array(data['input_data_neural'])
+    #y = np.array(data['output_data_neural'])
 
     x_train, x_test, y_train , y_test = train_test_split(X, y, 
                                                      test_size=0.2, random_state=0)

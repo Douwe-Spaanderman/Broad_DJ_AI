@@ -14,6 +14,10 @@ from sklearn.model_selection import GridSearchCV, StratifiedKFold, cross_validat
 from sklearn.ensemble import RandomForestClassifier
 from imblearn.ensemble import BalancedRandomForestClassifier
 
+# Currently use sys to get other script
+import sys
+sys.path.insert(1, "/Users/dspaande/Documents/GitProjects/Broad_DJ_AI/DeepGrowth/Utils/")
+from help_functions import str_to_bool, str_none_check
 
 def load_data(Path, supplements=True, test_size=0.2, random_state=None):
     '''
@@ -109,9 +113,10 @@ if __name__ == '__main__':
     parser.add_argument("-f", dest="max_features", nargs='?', default='auto', help="The number of features to consider when looking for the best split (default = auto), you can provide auto/sqrt/log2/none or any int/float")
     parser.add_argument("-d", dest="max_depth", nargs='?', default=None, help="max depth of tree (default = None)")
     parser.add_argument("-cr", dest="criterion", nargs='?', default="entropy", help="The function to measure the quality of a split (default = entropy)", choices=['gini', 'entropy'])
-    parser.add_argument("-o", dest="oob_score", nargs='?', default="normal", help="Number of estimators/trees (default = 100)")
+    parser.add_argument("-o", dest="oob_score", nargs='?', default="False", help="Number of estimators/trees (default = 100)")
     parser.add_argument("-w", dest="class_weight", nargs='?', default="balanced", help="Class_weight", choices=['balanced', 'balanced_subsample', 'None'])
 
+    # Setup conditions
     args = parser.parse_args()
     start = time.time()
     if args.random_state == "None" or args.random_state == None:
@@ -136,12 +141,17 @@ if __name__ == '__main__':
     else: 
         max_features = int(args.max_features)
 
+    if args.oob_score == "False":
+        oob_score = False
+    elif type(args.oob_score) == str:
+        oob_score = int(args.oob_score)
+
     # Load data
-    X_train, Y_train, X_test, Y_test = load_data(args.Path, supplements=bool(args.supplements), test_size=float(args.partion), random_state=random_state)
+    X_train, Y_train, X_test, Y_test = load_data(args.Path, supplements=str_to_bool(args.supplements), test_size=float(args.partion), random_state=random_state)
 
     # Train or load model (last currently not implemented)
     if args.train == "single_train":
-        model = train_model(X_train, Y_train, imbalance=bool(args.imbalance), random_state=random_state, cores=int(args.cores), n_estimators=int(args.n_estimators), max_features=max_features, max_depth=max_depth, criterion=args.criterion, oob_score=bool(args.oob_score), class_weight=class_weight)
+        model = train_model(X_train, Y_train, imbalance=str_to_bool(args.imbalance), random_state=random_state, cores=int(args.cores), n_estimators=int(args.n_estimators), max_features=max_features, max_depth=max_depth, criterion=args.criterion, oob_score=oob_score, class_weight=class_weight)
     elif args.train == "grid_train":
         if args.grid_param == "Default":
             param_grid = {'n_estimators': [100, 200, 500], 'max_features': ['auto', 'log2'], 'max_depth' : [None],'criterion' :['gini', 'entropy'], 'oob_score': [False], 'class_weight': ['balanced', 'balanced_subsample', None]}

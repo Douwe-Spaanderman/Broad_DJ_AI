@@ -6,10 +6,13 @@ import pandas as pd
 from pathlib import Path
 import warnings
 import numpy as np
+import argparse
+import time
+import json
 
 # Currently use sys to get other script
 import sys
-sys.path.insert(1, "../Classes/")
+sys.path.insert(1, "/Users/dspaande/Documents/GitProjects/Broad_DJ_AI/DeepGrowth/Classes/")
 from gene_one_hot import one_hot
 
 def maf_extract(maf):
@@ -37,15 +40,13 @@ def maf_extract(maf):
 
     return maf_frame, file_name
 
-#Why is this not in base python
-def mean(numbers):
-    '''
-
-    '''
-    return float(sum(numbers)) / max(len(numbers), 1)
+# Currently use sys to get other script
+import sys
+sys.path.insert(1, "/Users/dspaande/Documents/GitProjects/Broad_DJ_AI/DeepGrowth/Utils/")
+from help_functions import mean, str_to_bool
 
 #Filtering and frame transformation
-def filter_frame(maf_row, cutoff=0.3, filter_protein_coding=False):
+def filter_frame(maf_row, cutoff=0, filter_protein_coding=False):
     '''
 
     '''
@@ -111,7 +112,7 @@ def mutation_filter(data, classification_filter=True, ensembl_filter=False):
     if classification_filter == True:
         data = data[~data["Variant_Classification"].isin(["Intron", "lincRNA", "IGR", "5'Flank", "5'UTR", "Silent", "3'UTR", "RNA"])]
     
-    if classification_filter == True:
+    if ensembl_filter == True:
         data = data[~data["Ensembl_so_term"].isin(["intron_variant", "intergenic_variant", "upstream_gene_variant", "5_prime_UTR_variant", "synonymous_variant", "3_prime_UTR_variant", ""])]  
 
     return data
@@ -166,6 +167,7 @@ def main_maf(directory, filter_protein_coding=False, classification_filter=True,
         pathlist = Path(directory).glob('/*.maf*')
     
     data = []
+    cache_failed = []
     for idx, path in enumerate(pathlist):
         maf_frame, file_name = maf_extract(path)
 
@@ -174,6 +176,7 @@ def main_maf(directory, filter_protein_coding=False, classification_filter=True,
 
         if type(maf_frame) == pd.core.series.Series or maf_frame.empty == True:
             print(f"{file_name} has no mutations that made tumor fraction cutoff")
+            cache_failed.append(file_name)
             continue
     
         maf_frame = clean_frame(maf_frame)
@@ -184,7 +187,7 @@ def main_maf(directory, filter_protein_coding=False, classification_filter=True,
             print(f'done {idx+1} out of {number_of_files}')
 
     data = pd.concat(data)
-    data = mutation_filter(data, classification_filter, ensembl_filter)
+    data = mutation_filter(data, classification_filter=classification_filter, ensembl_filter=classification_filter)
     
     # Now create one-hot
     data_summary = []
@@ -223,7 +226,23 @@ def main_maf(directory, filter_protein_coding=False, classification_filter=True,
         data.to_pickle(Save)
         data_summary.to_pickle(Save_summary)
 
+        with open(Save + "cache_failed.json", 'w') as f:
+            json.dump(cache_failed, f, indent=2) 
+
     if Show == True:
         print(data)
 
-main_maf(directory="../Data/Panel/", Save="../Data/Ongoing/")
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Read and combine all maf data with the data")
+    parser.add_argument("Path", help="path to directory with maf files")
+    parser.add_argument("-s", dest="Save", nargs='?', default=False, help="location of file")
+    parser.add_argument("-d", dest="Show", nargs='?', default=True, help="Do you want to show the plot?")
+    parser.add_argument("-p", dest="filter_protein_coding", nargs='?', default=True, help="Do you want to show the plot?")
+    parser.add_argument("-c", dest="classification_filter", nargs='?', default=False, help="Do you want to show the plot?")
+    parser.add_argument("-e", dest="ensembl_filter", nargs='?', default=False, help="Do you want to show the plot?")
+
+    args = parser.parse_args()
+    start = time.time()
+    main_maf(directory=args.Path, filter_protein_coding=str_to_bool(args.filter_protein_coding), classification_filter=str_to_bool(args.classification_filter), ensembl_filter=str_to_bool(args.ensembl_filter), Save=args.Save, Show=str_to_bool(args.Show))
+    end = time.time()
+    print('completed in {} seconds'.format(end-start))

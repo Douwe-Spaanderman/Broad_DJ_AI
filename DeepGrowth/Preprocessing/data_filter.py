@@ -4,6 +4,7 @@
 
 # Libraries
 import pandas as pd
+import os
 import numpy as np
 from pathlib import Path
 import argparse
@@ -52,7 +53,7 @@ def filter_nan_sequence(data, selection="PANEL"):
 
     return data
 
-def main_filter(Path, Save=False, Filter="PANEL"):
+def datafilter(Path, Save=False, Filter="PANEL"):
     '''
     Main script to run data filtering
 
@@ -70,8 +71,9 @@ def main_filter(Path, Save=False, Filter="PANEL"):
 
     if Save != False:
         if not Save.endswith(".pkl"):
+            os.mkdir(Save)
             Save = Save + "filtered.pkl"
-        
+
         data.to_pickle(Save)
 
     return data
@@ -84,6 +86,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     start = time.time()
-    data = main_filter(Path=args.Path, Save=args.Save, Filter=args.Filter)
+    data = datafilter(Path=args.Path, Save=args.Save, Filter=args.Filter)
     end = time.time()
     print('completed in {} seconds'.format(end-start))
