@@ -31,3 +31,8 @@ class one_hot:
         counts = np.delete(self.counts, index)
         levels = np.delete(self.levels, index)
         return one_hot(counts, levels)
+
+    def add(self, other_one_hot):
+        counts = np.concatenate((self.counts, other_one_hot.counts), axis=None)
+        levels = np.concatenate((self.levels, other_one_hot.levels), axis=None)
+        return one_hot(counts, levels)

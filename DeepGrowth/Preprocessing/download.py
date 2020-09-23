@@ -17,7 +17,7 @@ def gsutil(link, Save="../../Data/Panel/."):
     '''
     os.system(f'gsutil cp {link} {Save}')
 
-def download_data(data, Path=False, Save="../../Data/Panel/.", Files="Panel"):
+def download_data(data, Path=False, Save="../../Data/Panel/.", Files="maf"):
     '''
     Main script to download data from google bucket
 
@@ -32,8 +32,10 @@ def download_data(data, Path=False, Save="../../Data/Panel/.", Files="Panel"):
             Path = Path + "filtered.pkl"
         data = pd.read_pickle(Path)
 
-    if Files == "Panel":
+    if Files == "maf":
         pd.Series(data["PANEL_oncotated_maf_mutect2"].unique()).apply(gsutil, Save=Save)
+    if Files == "cnv":
+        pd.Series(data["PANEL_cnv_calls"].unique()).apply(gsutil, Save=Save)
     elif Files == "RNA":
         print("currently not implemented")
     else:
@@ -45,7 +47,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Download files from google bucket")
     parser.add_argument("Path", help="path to terra workspace filtered file")
     parser.add_argument("-s", dest="Save", nargs='?', default=False, help="location of file")
-    parser.add_argument("-f", dest="Files", nargs='?', default='Panel', help="which files would you like to download", choices=["Panel", "RNA", "WES"])
+    parser.add_argument("-f", dest="Files", nargs='?', default='maf', help="which files would you like to download", choices=["maf", "cnv", "RNA", "WES"])
 
     args = parser.parse_args()
     start = time.time()

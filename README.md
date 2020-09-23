@@ -7,4 +7,3 @@ Machine Learning for media prediction
 - Package
 - Setup.py
 - Snakemake
-- CNV
