@@ -153,6 +153,30 @@ def one_hot_encoder(data, all_genes:list, all_alterations:list):
     #Create classes
     return flat, all_alt, all_alt_2D
 
+#Create one-hot encoding for empty failed mutation files
+def one_hot_empty(all_genes:list, all_alterations:list):
+    '''
+    
+    '''    
+    # Initialize empty arrays
+    gene_array = np.zeros(shape=(len(all_genes)))
+    gene_alteration_1D_array = np.zeros(shape=(len(all_alterations)))
+    
+    #Create class
+    flat = one_hot(gene_array, all_genes)
+    all_alt = one_hot(gene_alteration_1D_array, all_alterations)
+    
+    #2D array
+    all_alt_2D = all_alt.make_2D(int(len(all_alterations)/len(all_genes)))
+    
+    # Sanity checks
+    flat.sanity()
+    all_alt.sanity()
+    all_alt_2D.sanity()
+
+    #Create classes
+    return flat, all_alt, all_alt_2D
+
 def main_maf(directory, filter_protein_coding=False, classification_filter=True, ensembl_filter=False, Save=False, Show=True):
     '''
 
@@ -171,16 +195,16 @@ def main_maf(directory, filter_protein_coding=False, classification_filter=True,
     for idx, path in enumerate(pathlist):
         maf_frame, file_name = maf_extract(path)
 
-        print("now doing: {}".format(file_name))
+        #print("now doing: {}".format(file_name))
         maf_frame = maf_frame.apply(filter_frame, cutoff=0, filter_protein_coding=filter_protein_coding, axis=1)
 
         if type(maf_frame) == pd.core.series.Series or maf_frame.empty == True:
-            print(f"{file_name} has no mutations that made tumor fraction cutoff")
+            print(f"{file_name} has no mutations that made tumor fraction cutoff or in protein coding")
             cache_failed.append(file_name)
             continue
     
         maf_frame = clean_frame(maf_frame)
-        maf_frame["file"] = path.name
+        maf_frame["file"] = file_name
         
         data.append(maf_frame)
         if idx % 10 == 0:
@@ -215,18 +239,37 @@ def main_maf(directory, filter_protein_coding=False, classification_filter=True,
         if i % 10 == 0:
             print(f'done {i+1} out of {len(unique_names)}')
 
-    data_summary = pd.concat(data_summary)
+    if not cache_failed:
+        print("No failed mutation files")
+    else:
+        for i, name in enumerate(cache_failed):
+            flat, all_alt, all_alt_2D = one_hot_empty(all_genes, all_alterations)
+            # Create dataframe
+            tmp_data = pd.DataFrame({
+                            "File": name,
+                            "Flat_one_hot": flat,
+                            "Alt_one_hot": all_alt,
+                            "Alt_2D": all_alt_2D
+            }, index=[0])
+            
+            data_summary.append(tmp_data)
 
-    
+            if i % 10 == 0:
+                print(f'done {i+1} out of {len(unique_names)}')
+
+    data_summary = pd.concat(data_summary)
+    print(data_summary)
+
     if Save != False:
+        Save_cache = Save
         if not Save.endswith(".pkl"):
             Save = Save + "maf_extract.pkl"
             
         Save_summary = "/".join(["_summary.".join(x.split(".")) if i+1 == len(Save.split("/")) else x for i, x in enumerate(Save.split("/"))])
         data.to_pickle(Save)
         data_summary.to_pickle(Save_summary)
-
-        with open(Save + "cache_failed.json", 'w') as f:
+            
+        with open(Save_cache + "cache_failed_maf.json", 'w') as f:
             json.dump(cache_failed, f, indent=2) 
 
     if Show == True:

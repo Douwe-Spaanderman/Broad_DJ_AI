@@ -71,8 +71,11 @@ def datafilter(Path, Save=False, Filter="PANEL"):
 
     if Save != False:
         if not Save.endswith(".pkl"):
-            os.mkdir(Save)
-            Save = Save + "filtered.pkl"
+            try:
+                Save = Save + "filtered.pkl"
+            except:
+                os.mkdir(Save)
+                Save = Save + "filtered.pkl"
 
         data.to_pickle(Save)
 

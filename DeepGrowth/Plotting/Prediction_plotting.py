@@ -4,6 +4,9 @@ import argparse
 import time
 import matplotlib.pyplot as plt
 import warnings
+import sys
+sys.path.insert(1, "/Users/dspaande/Documents/GitProjects/Broad_DJ_AI/DeepGrowth/Utils/")
+from help_functions import mean, str_to_bool, str_none_check
 
 from sklearn.metrics import classification_report, roc_curve, roc_auc_score, precision_recall_curve, auc
 # 
@@ -32,7 +35,7 @@ def ROC(data, save=False, show=True):
     if show == False and save == False:
         warnings.warn('you are not checking the input data for media/supplements')
 
-
+    plt.clf()
 
 # Precision-Recall Curves
 ## More usefull due to less imbalance
@@ -58,6 +61,8 @@ def Precision_Recall(data, save=False, show=True):
         plt.show()
     if show == False and save == False:
         warnings.warn('Both save and show is set to False')
+
+    plt.clf()
 
 def Prediction_plotting(data, Path=False, save=False, show=True):
     '''
@@ -86,6 +91,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     start = time.time()
     print(bool(args.Show))
-    Prediction_plotting(data=False, Path=args.Path, save=args.Save, show=bool(args.Show))
+    Prediction_plotting(data=False, Path=args.Path, save=args.Save, show=str_to_bool(args.Show))
     end = time.time()
     print('completed in {} seconds'.format(end-start))

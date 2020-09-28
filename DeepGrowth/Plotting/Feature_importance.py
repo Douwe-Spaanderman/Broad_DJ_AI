@@ -5,7 +5,7 @@ import pickle
 
 
 if __name__ == '__main__':
-    model = pickle.load(open("../Data/Ongoing/RF_model.sav", 'rb'))
+    model = pickle.load(open("../../Data/Ongoing/Model/RF_model.sav", 'rb'))
 
 
     plt.rcParams["figure.figsize"] = 10,4
@@ -24,6 +24,6 @@ if __name__ == '__main__':
 
     plt.tight_layout()
     plt.show()
-    plt.savefig("../Data/Ongoing/Feature_importance.png")
+    plt.savefig("../../Data/Ongoing/Figures/Feature_importance.png")
 
     

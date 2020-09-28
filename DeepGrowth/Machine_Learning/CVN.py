@@ -11,7 +11,7 @@ from sklearn.metrics import classification_report, confusion_matrix, balanced_ac
 from hyperopt import Trials, STATUS_OK, tpe
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.keras.layers import Dense, Dropout, Activation
+from tensorflow.keras.layers import Dense, Dropout, Activation, Conv1D, MaxPooling1D, Flatten
 from tensorflow.keras.models import Sequential
 from hyperas import optim
 from hyperas.distributions import choice, uniform
@@ -48,7 +48,8 @@ def create_model(x_train, y_train, x_test, y_test):
         - model: specify the model just created so that we can later use it again.
     """
     model = Sequential()
-    model.add(Dense({{choice([16, 32, 64, 128, 256, 512])}}, input_shape=(len(x_train[0]),)))
+    model.add(Conv1D(filters=32, kernel_size=5, input_shape=(6, 45)))
+    model.add(MaxPooling1D(pool_size=5))
     model.add(Activation('relu'))
     model.add(Dropout({{uniform(0, 1)}}))
     # If we choose 'two', add an additional second layer
@@ -66,15 +67,16 @@ def create_model(x_train, y_train, x_test, y_test):
 
             model.add({{choice([Dropout(0.5), Activation('linear')])}})
             model.add(Activation('relu'))
-        
-            # If we choose 'four', add an additional fourth layer
-            if {{choice(['three', 'four'])}} == 'four':
-                model.add(Dense({{choice([8, 16, 32, 64, 128, 256])}}))
 
-                # We can also choose between complete sets of layers
+    model.add(Flatten())
+    # If we choose 'four', add an additional fourth layer
+    if {{choice(['three', 'four'])}} == 'four':
+        model.add(Dense({{choice([8, 16, 32, 64])}}))
 
-                model.add({{choice([Dropout(0.5), Activation('linear')])}})
-                model.add(Activation('relu'))
+        # We can also choose between complete sets of layers
+
+        model.add({{choice([Dropout(0.5), Activation('linear')])}})
+        model.add(Activation('relu'))
 
     model.add(Dense(1))
     model.add(Activation('sigmoid'))
@@ -84,7 +86,7 @@ def create_model(x_train, y_train, x_test, y_test):
 
     result = model.fit(x_train, y_train,
               batch_size={{choice([64, 128])}},
-              epochs=500,
+              epochs=1,
               verbose=2,
               validation_split=0.1)
     
@@ -116,7 +118,7 @@ def main_neural(path, save=False):
     best_run, best_model = optim.minimize(model=create_model,
                                           data=data,
                                           algo=tpe.suggest,
-                                          max_evals=200,
+                                          max_evals=1,
                                           trials=Trials(),
                                           data_args=(path,)
     )
@@ -136,8 +138,8 @@ def main_neural(path, save=False):
     predictions = predict_model(X_test, Y_test, model=best_model)
 
     if save != False:
-        best_model.save(args.Save_location + "CVN_model")
-        predictions.to_pickle(args.Save_location + "Predictions_CVN.pkl")
+        best_model.save(args.Save_location + "MLP_model")
+        predictions.to_pickle(args.Save_location + "Predictions.pkl")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Multilayer perceptron")

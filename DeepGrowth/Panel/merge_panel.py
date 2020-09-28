@@ -58,9 +58,25 @@ def additional_merge(row, include_disease=None, include_tissue=False, include_di
     hot_info = one_hot(np.empty(0), np.empty(0))
     if include_disease != None:
         if include_disease == "Highest level":
-            hot_info
+            disease_onehot = one_hot(np.zeros(len(cache_diseases_highest)), np.array(cache_diseases_highest))
+            try:
+                inde = cache_diseases_highest.index(str(row["Disease_highest_level"]))
+            except:
+                inde = cache_diseases_highest.index("Unknown")
+
+            disease_onehot.counts[inde] = 1
+            
+            hot_info = hot_info.add(disease_onehot)
         elif include_disease == "Lowest level":
-            hot_info
+            disease_onehot = one_hot(np.zeros(len(cache_diseases_lowest)), np.array(cache_diseases_lowest))
+            try:
+                inde = cache_diseases_lowest.index(str(row["Disease_lowest_level"]))
+            except:
+                inde = cache_diseases_lowest.index("Unknown")
+
+            disease_onehot.counts[inde] = 1
+            
+            hot_info = hot_info.add(disease_onehot)
         else:
             raise KeyError(f"Unrecognized include disease info: {include_disease}. Please use either None, Highest level or Lowest level")
     
@@ -88,8 +104,6 @@ def additional_merge(row, include_disease=None, include_tissue=False, include_di
 
     hot_info = hot_info.add(row["cnv_one_hot"])
     row["Flat_one_hot"] = hot_info.add(row['maf_one_hot'])
-
-    print(row["Flat_one_hot"])
     return row
 
 def main_merge(data, Path=False, include_cnv=True, include_disease=None, include_tissue=False, include_dimension=False, Save=False, Show=False):
@@ -103,13 +117,15 @@ def main_merge(data, Path=False, include_cnv=True, include_disease=None, include
     meta_data = other_data(data=data, Path=Path)
 
     # Create File name -> Should be in maf.py
-    meta_data["File"] = [str(x).split("/")[-1] for x in meta_data["PANEL_oncotated_maf_mutect2"]]
+    meta_data["File"] = [str(x).split("/")[-1].split(".")[0] for x in meta_data["PANEL_oncotated_maf_mutect2"]]
 
     data = pd.merge(meta_data, maf_data, on="File")
 
     # Create global caches
-    #cache_diseases_highest = 
-    #cache_diseases_lowest = 
+    global cache_diseases_highest
+    cache_diseases_highest = data["Disease_highest_level"].unique().tolist()
+    global cache_diseases_lowest
+    cache_diseases_lowest = data["Disease_lowest_level"].unique().tolist()
     global cache_dimension
     cache_dimension = data["Dimension"].unique().tolist()
     cache_dimension = ["Unknown" if str(x)=="nan" or str(x) == "2D,Suspension" else str(x) for x in cache_dimension]
@@ -126,6 +142,7 @@ def main_merge(data, Path=False, include_cnv=True, include_disease=None, include
         data.rename(columns = {'Flat_one_hot': 'maf_one_hot', 'Alt_one_hot': 'maf_Alt_one_hot', 'Alt_2D': 'maf_Alt_2D'}, inplace = True)
         data = data.apply(additional_merge, include_disease=include_disease, include_tissue=include_tissue, include_dimension=include_tissue, axis=1)
 
+    print(data)
     # Input with media as input
     input_data = data.apply(lambda x: np.append(x["Flat_one_hot"].counts, x["one-hot"].media.counts), axis=1)
     input_data = np.vstack(input_data)
@@ -172,10 +189,10 @@ def main_merge(data, Path=False, include_cnv=True, include_disease=None, include
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Combine panel data with main frame")
     parser.add_argument("Path", help="path to directory with all files")
-    parser.add_argument("-c", dest="CNV", nargs='?', default=True, help="Do you want to include copy number variations?")
+    parser.add_argument("-c", dest="CNV", nargs='?', default=False, help="Do you want to include copy number variations?")
     parser.add_argument("-n", dest="DiseaseName", nargs='?', default=None, help="Do you want to include disease name?", choices=['Highest level', 'Lowest level', 'None'])
-    parser.add_argument("-t", dest="Tissue", nargs='?', default=True, help="Do you want to include tissue site?")
-    parser.add_argument("-r", dest="Dimension", nargs='?', default=True, help="Do you want to include dimension?")
+    parser.add_argument("-t", dest="Tissue", nargs='?', default=False, help="Do you want to include tissue site?")
+    parser.add_argument("-r", dest="Dimension", nargs='?', default=False, help="Do you want to include dimension?")
     parser.add_argument("-s", dest="Save", nargs='?', default=False, help="location of file")
     parser.add_argument("-d", dest="Show", nargs='?', default=True, help="Do you want to show the plot?")
 

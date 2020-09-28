@@ -7,7 +7,7 @@ import pandas as pd
 
 from sklearn import metrics
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report, confusion_matrix, balanced_accuracy_score, accuracy_score
+from sklearn.metrics import classification_report, multilabel_confusion_matrix, balanced_accuracy_score, accuracy_score
 from hyperopt import Trials, STATUS_OK, tpe
 import tensorflow as tf
 from tensorflow import keras
@@ -29,8 +29,10 @@ def data(Path):
     with open(Path) as json_file:
         data = json.load(json_file)
 
-    X = np.array(data['input_data_supplements'])
-    y = np.array(data['output_data_supplements'])
+    X = np.array(data['input_data_neural'])
+    y = np.array(data['output_data_neural'])
+
+    print(len(y[0]))
 
     x_train, x_test, y_train , y_test = train_test_split(X, y, 
                                                      test_size=0.2, random_state=0)
@@ -48,19 +50,19 @@ def create_model(x_train, y_train, x_test, y_test):
         - model: specify the model just created so that we can later use it again.
     """
     model = Sequential()
-    model.add(Dense({{choice([16, 32, 64, 128, 256, 512])}}, input_shape=(len(x_train[0]),)))
+    model.add(Dense({{choice([64, 128, 256, 512])}}, input_shape=(len(x_train[0]),)))
     model.add(Activation('relu'))
     model.add(Dropout({{uniform(0, 1)}}))
     # If we choose 'two', add an additional second layer
     if {{choice(['one', 'two'])}} == 'two':
-        model.add(Dense({{choice([16, 32, 64, 128, 256])}}))
+        model.add(Dense({{choice([64, 128, 256])}}))
         model.add(Activation({{choice(['relu', 'sigmoid'])}}))
         model.add(Dropout({{uniform(0, 1)}}))
     
 
         # If we choose 'three', add an additional thirth layer
         if {{choice(['two', 'three'])}} == 'three':
-            model.add(Dense({{choice([8, 16, 32, 64, 128, 256])}}))
+            model.add(Dense({{choice([64, 128, 256])}}))
 
             # We can also choose between complete sets of layers
 
@@ -69,18 +71,18 @@ def create_model(x_train, y_train, x_test, y_test):
         
             # If we choose 'four', add an additional fourth layer
             if {{choice(['three', 'four'])}} == 'four':
-                model.add(Dense({{choice([8, 16, 32, 64, 128, 256])}}))
+                model.add(Dense({{choice([64, 128, 256])}}))
 
                 # We can also choose between complete sets of layers
 
                 model.add({{choice([Dropout(0.5), Activation('linear')])}})
                 model.add(Activation('relu'))
 
-    model.add(Dense(1))
-    model.add(Activation('sigmoid'))
+    model.add(Dense(52))
+    model.add(Activation('softmax'))
 
     model.compile(loss='binary_crossentropy', metrics=['accuracy'],
-                  optimizer={{choice(['rmsprop', 'adam', 'sgd'])}})
+                  optimizer="adam")
 
     result = model.fit(x_train, y_train,
               batch_size={{choice([64, 128])}},
@@ -98,15 +100,20 @@ def predict_model(x_test, y_test, model):
     '''
     predictions = model.predict(x_test)
     
-    predictions = [0 if x < 0.5 else 1 for x in predictions]
-    print(confusion_matrix(y_test, predictions))
-    print('\n')
-    print(classification_report(y_test, predictions))
-    print('\n')
-    print(f'Accuracy score: {accuracy_score(y_test, predictions)*100:.2f}%')
-    print(f"Balanced accuracy score : {balanced_accuracy_score(y_test, predictions)*100:.2f}%")
+    prediction = []
+    for pred in predictions:
+        pred = [0 if x < 0.5 else 1 for x in pred]
+        prediction.append(pred)
 
-    predictions = pd.DataFrame({"Predictions":predictions, "True_labels":y_test.tolist()})
+    y_pred = np.asarray(prediction)
+
+    print(multilabel_confusion_matrix(y_test, y_pred))
+    print('\n')
+    print(classification_report(y_test, y_pred))
+    print('\n')
+    print(f'Accuracy score: {accuracy_score(y_test, y_pred)*100:.2f}%')
+
+    predictions = pd.DataFrame({"Predictions":[y_pred], "True_labels":[y_test]}, index=[0])
     return predictions
 
 def main_neural(path, save=False):
@@ -116,7 +123,7 @@ def main_neural(path, save=False):
     best_run, best_model = optim.minimize(model=create_model,
                                           data=data,
                                           algo=tpe.suggest,
-                                          max_evals=200,
+                                          max_evals=25,
                                           trials=Trials(),
                                           data_args=(path,)
     )
@@ -136,8 +143,8 @@ def main_neural(path, save=False):
     predictions = predict_model(X_test, Y_test, model=best_model)
 
     if save != False:
-        best_model.save(args.Save_location + "CVN_model")
-        predictions.to_pickle(args.Save_location + "Predictions_CVN.pkl")
+        best_model.save(args.Save_location + "MLP_model_neural")
+        predictions.to_pickle(args.Save_location + "Predictions_neural.pkl")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Multilayer perceptron")

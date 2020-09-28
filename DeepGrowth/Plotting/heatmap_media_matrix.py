@@ -18,7 +18,10 @@ import sys
 sys.path.insert(1, "../Classes/")
 from media_class import Medium, Supplement, GrowthMedium, Medium_one_hot, Supplement_one_hot, GrowthMedium_one_hot
 
-def extract_data(data):
+sys.path.insert(1, "/Users/dspaande/Documents/GitProjects/Broad_DJ_AI/DeepGrowth/Utils/")
+from help_functions import mean, str_to_bool, str_none_check
+
+def extract_data(data, level="Highest"):
     '''
     Changing data for plotting
     
@@ -31,8 +34,15 @@ def extract_data(data):
     '''
     #Create an empty numpy array for the heatmap in which to count occurences
     # First get all disease types and all media/supplements
-    #disease_types = list(set(data["Primary_Disease"]))
-    disease_types = list(set(data["Lowest Level"]))
+    if level == "Highest":
+        data = data[data["Disease_highest_level"] != "Unknown"]
+        disease_types = list(set(data["Disease_highest_level"]))
+        
+    elif level == "Lowest":
+        data = data[data["Disease_lowest_level"] != "Unknown"]
+        disease_types = list(set(data["Disease_lowest_level"]))
+    else:
+        raise KeyError(f"Wierd disease level was passed: {level}. please provide either Highest or Lowest")
     disease_types = sorted([x for x in disease_types if not str(x) == "nan"])
     
     all_media = sorted(list(set().union(*(d.keys() for d in [x.media for x in data["media_class"]]))))
@@ -43,8 +53,12 @@ def extract_data(data):
     
     # Loop for each disease:
     for i, disease in enumerate(disease_types):
-        #tmp_data = data[data["Primary_Disease"] == disease]
-        tmp_data = data[data["Lowest Level"] == disease]
+        if level == "Highest":
+            tmp_data = data[data["Disease_highest_level"] == disease]
+        elif level == "Lowest":
+            tmp_data = data[data["Disease_lowest_level"] == disease]
+        else:
+            raise KeyError(f"Wierd disease level was passed: {level}. please provide either Highest or Lowest")
         
         if not tmp_data.empty:
             #Get all keys
@@ -166,7 +180,7 @@ def plotting(heatmap_media, heatmap_supplements, Scale="log2", save=False, show=
     if show == False and save == False:
         warnings.warn('you are not checking the input data for media/supplements')
 
-def heatmap_media_matrix(data, Path=False, Order="Occurence", Scale="log2", save=False, show=True):
+def heatmap_media_matrix(data, Path=False, Order="Occurence", Scale="log2", level="Highest", save=False, show=True):
     '''
     Main script for plotting heatmap media matrix
 
@@ -185,9 +199,8 @@ def heatmap_media_matrix(data, Path=False, Order="Occurence", Scale="log2", save
             Path = Path + "after_media.pkl"
         
         data = pd.read_pickle(Path)
-        data = data[data["Lowest Level"] != "Need more information (is it possible to know which case? so we can find out from collaborators)"]
     
-    media_data, supplement_data = extract_data(data)
+    media_data, supplement_data = extract_data(data, level)
 
     if Order == "Clustered":
         media_data = Cluster_order(media_data)
@@ -220,11 +233,12 @@ if __name__ == '__main__':
     parser.add_argument("Path", help="path to terra workspace filtered file after media.py")
     parser.add_argument("-s", dest="Save", nargs='?', default=False, help="location of file")
     parser.add_argument("-d", dest="Show", nargs='?', default=True, help="Do you want to show the plot?")
+    parser.add_argument("-l", dest="disease_level", nargs='?', default="Highest", help="which disease level would you like to use?", choices=["Highest", "Lowest"])
     parser.add_argument("-o", dest="Data_ordering", nargs='?', default="Occurence", help="would you like to do order the data", choices=["Occurence", "Clustered", "Nothing", "All"])
     parser.add_argument("-c", dest="Data_scaling", nargs='?', default="log2", help="how would you like to scale the data", choices=["log2", "normalized", "log10"])
 
     args = parser.parse_args()
     start = time.time()
-    heatmap_media_matrix(data=False, Path=args.Path, Order=args.Data_ordering, save=args.Save, show=bool(args.Show), Scale=args.Data_scaling)
+    heatmap_media_matrix(data=False, Path=args.Path, Order=args.Data_ordering, level=args.disease_level, save=args.Save, show=str_to_bool(args.Show), Scale=args.Data_scaling)
     end = time.time()
     print('completed in {} seconds'.format(end-start))
