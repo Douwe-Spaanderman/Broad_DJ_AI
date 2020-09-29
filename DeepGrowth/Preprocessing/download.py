@@ -34,7 +34,7 @@ def download_data(data, Path=False, Save="../../Data/Panel/.", Files="maf"):
 
     if Files == "maf":
         pd.Series(data["PANEL_oncotated_maf_mutect2"].unique()).apply(gsutil, Save=Save)
-    if Files == "cnv":
+    elif Files == "cnv":
         pd.Series(data["PANEL_cnv_calls"].unique()).apply(gsutil, Save=Save)
     elif Files == "RNA":
         print("currently not implemented")

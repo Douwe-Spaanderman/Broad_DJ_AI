@@ -29,8 +29,8 @@ def data(Path):
     with open(Path) as json_file:
         data = json.load(json_file)
 
-    X = np.array(data['input_data_supplements'])
-    y = np.array(data['output_data_supplements'])
+    X = np.array(data['input_data'])
+    y = np.array(data['output_data'])
 
     x_train, x_test, y_train , y_test = train_test_split(X, y, 
                                                      test_size=0.2, random_state=0)
@@ -116,7 +116,7 @@ def main_neural(path, save=False):
     best_run, best_model = optim.minimize(model=create_model,
                                           data=data,
                                           algo=tpe.suggest,
-                                          max_evals=200,
+                                          max_evals=50,
                                           trials=Trials(),
                                           data_args=(path,)
     )
