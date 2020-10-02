@@ -1,0 +1,411 @@
+{
+  "language": "english",
+  "target": "'/Applications/Xcode.app/Contents/Developer/usr/bin/python3' -u 'main.py'",
+  "suppress_gooey_flag": false,
+  "program_name": "CellCulturePy",
+  "program_description": "Predicting media conditions with genomic profile",
+  "sidebar_title": "Actions",
+  "default_size": [
+    610,
+    530
+  ],
+  "auto_start": false,
+  "show_advanced": true,
+  "run_validators": true,
+  "encoding": "utf-8",
+  "show_stop_warning": true,
+  "show_success_modal": true,
+  "show_failure_modal": true,
+  "force_stop_is_error": true,
+  "poll_external_updates": false,
+  "return_to_config": false,
+  "show_restart_button": true,
+  "requires_shell": true,
+  "menu": [],
+  "clear_before_run": false,
+  "fullscreen": false,
+  "use_legacy_titles": true,
+  "num_required_cols": 2,
+  "num_optional_cols": 2,
+  "manual_start": false,
+  "monospace_display": false,
+  "image_dir": "::gooey/default",
+  "language_dir": "/Users/dspaande/Library/Python/3.7/lib/python/site-packages/gooey/languages",
+  "progress_regex": null,
+  "progress_expr": null,
+  "hide_progress_msg": false,
+  "disable_progress_bar_animation": false,
+  "disable_stop_button": false,
+  "navigation": "SIDEBAR",
+  "show_sidebar": false,
+  "tabbed_groups": false,
+  "group_by_type": true,
+  "body_bg_color": "#f0f0f0",
+  "header_bg_color": "#ffffff",
+  "header_height": 80,
+  "header_show_title": true,
+  "header_show_subtitle": true,
+  "header_image_center": false,
+  "footer_bg_color": "#f0f0f0",
+  "sidebar_bg_color": "#f2f2f2",
+  "terminal_panel_color": "#F0F0F0",
+  "terminal_font_color": "#000000",
+  "terminal_font_family": null,
+  "terminal_font_weight": null,
+  "terminal_font_size": null,
+  "richtext_controls": false,
+  "error_color": "#ea7878",
+  "layout": "standard",
+  "widgets": {
+    "main.py": {
+      "command": "::gooey/default",
+      "name": "main.py",
+      "help": null,
+      "description": "",
+      "contents": [
+        {
+          "name": "required_args_msg",
+          "items": [
+            {
+              "id": "TumorType",
+              "type": "Dropdown",
+              "cli_type": "positional",
+              "required": true,
+              "data": {
+                "display_name": "TumorType",
+                "help": "what is your tumor type",
+                "required": true,
+                "nargs": "",
+                "commands": [],
+                "choices": [
+                  "Hematopoietic and Lymphoid System Neoplasm (C35813)",
+                  "Unknown",
+                  "Respiratory Tract Neoplasm (C3355)",
+                  "Head and Neck Neoplasm (C3077)",
+                  "Skin Neoplasm (C3372)",
+                  "Digestive System Neoplasm (C3052)",
+                  "Melanoma (C3224)",
+                  "Connective and Soft Tissue Neoplasm (C3810)",
+                  "Urinary System Neoplasm (C3431)",
+                  "Nervous System Neoplasm (C3268)",
+                  "Breast Neoplasm (C2910)",
+                  "Germ Cell Tumor (C3708)",
+                  "Reproductive System Neoplasm (C3674)",
+                  "Rhabdoid Tumor (C3808)",
+                  "Endocrine Neoplasm (C3010)",
+                  "Thoracic Neoplasm (C3406)"
+                ],
+                "default": null,
+                "dest": "TumorType"
+              },
+              "options": {
+                "error_color": "#ea7878",
+                "label_color": "#000000",
+                "help_color": "#363636",
+                "full_width": false,
+                "validator": {
+                  "test": "user_input",
+                  "message": "This field is required"
+                },
+                "external_validator": {
+                  "cmd": ""
+                }
+              }
+            },
+            {
+              "id": "Tissue",
+              "type": "Dropdown",
+              "cli_type": "positional",
+              "required": true,
+              "data": {
+                "display_name": "Tissue",
+                "help": "what is your tissue type",
+                "required": true,
+                "nargs": "",
+                "commands": [],
+                "choices": [
+                  "Pericardial Cavity",
+                  "Nerve",
+                  "Pancreas",
+                  "Muscle",
+                  "Esophagus",
+                  "Peritoneal Cavity",
+                  "Leg",
+                  "Retroperitoneum",
+                  "Lymph Node",
+                  "Adrenal Gland",
+                  "Pleural Cavity",
+                  "Oral Cavity",
+                  "Breast",
+                  "Abdominal Cavity",
+                  "Thoracic Cavity",
+                  "Bone",
+                  "Liver",
+                  "Thyroid",
+                  "Spinal Cord",
+                  "Peritoneum",
+                  "Rectum",
+                  "Kidney",
+                  "Head and neck region",
+                  "Meninges",
+                  "Blood",
+                  "Heart",
+                  "Skin",
+                  "Paraspinal",
+                  "Uterus",
+                  "Unknown",
+                  "Cecum",
+                  "Testis",
+                  "Omentum",
+                  "Parapharyngeal Space",
+                  "Bone Marrow",
+                  "Pelvis",
+                  "Ureter",
+                  "Gallbladder",
+                  "Soft tissue",
+                  "Lung",
+                  "Colon",
+                  "Ovary",
+                  "Spleen",
+                  "Mediastinum",
+                  "Neck",
+                  "Stomach",
+                  "Brain"
+                ],
+                "default": null,
+                "dest": "Tissue"
+              },
+              "options": {
+                "error_color": "#ea7878",
+                "label_color": "#000000",
+                "help_color": "#363636",
+                "full_width": false,
+                "validator": {
+                  "test": "user_input",
+                  "message": "This field is required"
+                },
+                "external_validator": {
+                  "cmd": ""
+                }
+              }
+            },
+            {
+              "id": "Dimension",
+              "type": "Dropdown",
+              "cli_type": "positional",
+              "required": true,
+              "data": {
+                "display_name": "Dimension",
+                "help": "what is your growing dimension",
+                "required": true,
+                "nargs": "",
+                "commands": [],
+                "choices": [
+                  "3D",
+                  "2D",
+                  "Suspension",
+                  "Unknown"
+                ],
+                "default": null,
+                "dest": "Dimension"
+              },
+              "options": {
+                "error_color": "#ea7878",
+                "label_color": "#000000",
+                "help_color": "#363636",
+                "full_width": false,
+                "validator": {
+                  "test": "user_input",
+                  "message": "This field is required"
+                },
+                "external_validator": {
+                  "cmd": ""
+                }
+              }
+            },
+            {
+              "id": "maf",
+              "type": "FileChooser",
+              "cli_type": "positional",
+              "required": true,
+              "data": {
+                "display_name": "maf",
+                "help": "Select maf file from TWIST (mutect1 or 2)",
+                "required": true,
+                "nargs": "",
+                "commands": [],
+                "choices": [],
+                "default": null,
+                "dest": "maf"
+              },
+              "options": {
+                "error_color": "#ea7878",
+                "label_color": "#000000",
+                "help_color": "#363636",
+                "full_width": false,
+                "validator": {
+                  "test": "user_input and not user_input.isspace()",
+                  "message": "This field is required"
+                },
+                "external_validator": {
+                  "cmd": ""
+                }
+              }
+            },
+            {
+              "id": "cnv",
+              "type": "FileChooser",
+              "cli_type": "positional",
+              "required": true,
+              "data": {
+                "display_name": "cnv",
+                "help": "Select cnv file from TWIST (.tumor.called)",
+                "required": true,
+                "nargs": "",
+                "commands": [],
+                "choices": [],
+                "default": null,
+                "dest": "cnv"
+              },
+              "options": {
+                "error_color": "#ea7878",
+                "label_color": "#000000",
+                "help_color": "#363636",
+                "full_width": false,
+                "validator": {
+                  "test": "user_input and not user_input.isspace()",
+                  "message": "This field is required"
+                },
+                "external_validator": {
+                  "cmd": ""
+                }
+              }
+            }
+          ],
+          "groups": [],
+          "description": null,
+          "options": {
+            "label_color": "#000000",
+            "description_color": "#363636",
+            "legacy": {
+              "required_cols": 2,
+              "optional_cols": 2
+            },
+            "columns": 2,
+            "padding": 10,
+            "show_border": false
+          }
+        },
+        {
+          "name": "optional_args_msg",
+          "items": [
+            {
+              "id": "-m",
+              "type": "Listbox",
+              "cli_type": "optional",
+              "required": false,
+              "data": {
+                "display_name": "Media",
+                "help": "you can select one or multiple media types you want to look for",
+                "required": false,
+                "nargs": "+",
+                "commands": [
+                  "-m"
+                ],
+                "choices": [
+                  "AR5",
+                  "BEGM",
+                  "Breast Organoid",
+                  "CM",
+                  "Chondrocyte Growth Media (CGM)",
+                  "DMEM-10",
+                  "E8",
+                  "EGM",
+                  "F Media",
+                  "HT Media Screen",
+                  "Kubota's Hepatoblast",
+                  "LTIM",
+                  "M87",
+                  "MEM culture media",
+                  "NSA",
+                  "Neurosphere (NSA)",
+                  "OGM",
+                  "OPAC",
+                  "Pancreas Organoid",
+                  "Propagenix CM",
+                  "Prostate Organoid",
+                  "RETM",
+                  "RPMI-10",
+                  "Renal Epithelial Growth Medium",
+                  "SCGM",
+                  "SMGM",
+                  "WIT-P",
+                  "XVIVO"
+                ],
+                "default": [],
+                "dest": "Media"
+              },
+              "options": {
+                "error_color": "#ea7878",
+                "label_color": "#000000",
+                "help_color": "#363636",
+                "full_width": false,
+                "validator": {
+                  "test": "True",
+                  "message": ""
+                },
+                "external_validator": {
+                  "cmd": ""
+                }
+              }
+            },
+            {
+              "id": "-s",
+              "type": "CheckBox",
+              "cli_type": "optional",
+              "required": false,
+              "data": {
+                "display_name": "Supplements",
+                "help": "Do you want to include looking for supplements (default: No)",
+                "required": false,
+                "nargs": "",
+                "commands": [
+                  "-s"
+                ],
+                "choices": [],
+                "default": false,
+                "dest": "Supplements"
+              },
+              "options": {
+                "error_color": "#ea7878",
+                "label_color": "#000000",
+                "help_color": "#363636",
+                "full_width": false,
+                "validator": {
+                  "test": "True",
+                  "message": ""
+                },
+                "external_validator": {
+                  "cmd": ""
+                }
+              }
+            }
+          ],
+          "groups": [],
+          "description": null,
+          "options": {
+            "label_color": "#000000",
+            "description_color": "#363636",
+            "legacy": {
+              "required_cols": 2,
+              "optional_cols": 2
+            },
+            "columns": 2,
+            "padding": 10,
+            "show_border": false
+          }
+        }
+      ]
+    }
+  }
+}
