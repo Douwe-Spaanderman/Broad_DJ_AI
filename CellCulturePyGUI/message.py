@@ -1,9 +1,10 @@
 import sys
 import time
+from colored import stylize, attr, fg
 
 program_message = \
 '''
-Thanks for using CellCulturePy
+\033[1m Thanks for using CellCulturePy \033[0m
 
 CellCulturePy tries to find the best growth media for you,
 Outcoming tabel displays media with highest probability of growing.
@@ -15,9 +16,7 @@ Here are the arguments you prodided:
 
 {0}
 
-Results: 
-
-
+Warnings:
 
 -------------------------------------
 
@@ -33,8 +32,15 @@ See ya!
 '''
 
 
-def display_message():
-    message = program_message.format('\n'.join(sys.argv[1:])).split('\n')
+def display_message(part):
+    if part == 1:
+        message = program_message.format('\n'.join(sys.argv[1:])).split('\n')
+        message = message[:len(message)-12]
+
+    if part == 2:
+        message = program_message.format('\n'.join(sys.argv[1:])).split('\n')
+        message = message[-13:]
+
     delay = 1.8 / len(message)
 
     for line in message:

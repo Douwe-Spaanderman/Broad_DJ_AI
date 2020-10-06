@@ -1,6 +1,8 @@
 Documentation/data/*
 Documentation/figs/*
 Data/*
+Documentation/*
+CellCulturePyGUI/gooey_config.json
 .Rproj.user
 .DS_Store
 .RData
