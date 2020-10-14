@@ -83,6 +83,8 @@ def Prediction_plotting(data, Path=False, save=False, show=True):
     if save != False:
         if save.endswith(".png"):
             raise KeyError("Please remove specified name file and use path instead for saving figures")
+        elif not save.endswith("Figures/"):
+            save += "Figures/"
     
     Precision_Recall(data, save=save, show=show)
     ROC(data, save=save, show=show)

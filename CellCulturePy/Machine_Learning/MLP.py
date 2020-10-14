@@ -116,7 +116,7 @@ def main_neural(path, save=False):
     best_run, best_model = optim.minimize(model=create_model,
                                           data=data,
                                           algo=tpe.suggest,
-                                          max_evals=50,
+                                          max_evals=100,
                                           trials=Trials(),
                                           data_args=(path,)
     )
@@ -136,6 +136,9 @@ def main_neural(path, save=False):
     predictions = predict_model(X_test, Y_test, model=best_model)
 
     if save != False:
+        if not save.endswith("Model/"):
+            save += "Model/"
+
         best_model.save(args.Save_location + "CVN_model")
         predictions.to_pickle(args.Save_location + "Predictions_CVN.pkl")
 

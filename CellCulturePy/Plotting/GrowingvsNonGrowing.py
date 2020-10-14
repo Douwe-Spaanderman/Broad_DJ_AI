@@ -72,6 +72,8 @@ def main_summary(data, Path=False, level="Highest", save=False, show=True):
         raise KeyError(f"Wierd disease level was passed: {level}. please provide either Highest or Lowest")
 
     if save != False:
+        if not save.endswith("Figures/"):
+            save += "Figures/"
         plt.savefig(save + "data_summary.png")
     if show == True:
         plt.show()

@@ -178,7 +178,7 @@ if __name__ == '__main__':
     # Prediction
     prediction = predict_model(X_test, Y_test, model=model)
 
-    with open(args.Save_location + "Cache/" + "indices_split_cache.json", 'w') as fp:
+    with open(args.Save_location + "Cache/" + "indices_split_RF.json", 'w') as fp:
         json.dump({
             "indices_train":indices_train.tolist(),
             "indices_test":indices_test.tolist()
@@ -189,6 +189,6 @@ if __name__ == '__main__':
         Save_location += "Model/"
 
     pickle.dump(model, open(Save_location + "RF_model.sav", 'wb'))
-    prediction.to_pickle(Save_location + "Predictions.pkl")
+    prediction.to_pickle(Save_location + "RF_Predictions.pkl")
 
     end = time.time()

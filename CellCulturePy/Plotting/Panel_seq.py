@@ -144,6 +144,8 @@ def main_pred(Path=False, save=False, show=True):
     ax.set_xticks([])
     
     if save != False:
+        if not save.endswith("Figures/"):
+            save += "Figures/"
         plt.savefig(save + "targeted_overview.png")
     if show == True:
         plt.show()

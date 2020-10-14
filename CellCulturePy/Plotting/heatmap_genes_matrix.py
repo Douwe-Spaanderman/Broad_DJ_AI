@@ -64,7 +64,7 @@ def extract_data(meta_data, maf_data, level="Lowest"):
     heatmap_data = pd.merge(maf_data, meta_data, on="file")
 
     if level == "Highest":
-            heatmap_data = heatmap_data.groupby(["Disease_highest_level", "Hugo_Symbol"]).size().reset_index(name="Count")
+        heatmap_data = heatmap_data.groupby(["Disease_highest_level", "Hugo_Symbol"]).size().reset_index(name="Count")
         heatmap_data = heatmap_data.pivot(index='Hugo_Symbol', columns='Disease_highest_level', values='Count')
         heatmap_data.index = heatmap_data.index.str.strip()
         heatmap_data = heatmap_data.reindex(counts_symbols["Hugo_Symbol"].tolist())
@@ -101,10 +101,10 @@ def plotting_normal(plot_data, counts_symbols, counts_disease, save=False, show=
     # Get a combined legend using the max value
     max_value = np.max(np.max(plot_data))
 
-    plt, ax = plt.subplots(2, 2, figsize=(30, 45), gridspec_kw={'width_ratios': [1, 5], 'height_ratios': [1, 7.5]})
+    f, ax = plt.subplots(2, 2, figsize=(30, 45), gridspec_kw={'width_ratios': [1, 5], 'height_ratios': [1, 7.5]})
     ax_genes = ax[1][0].plot(counts_symbols["Count"], counts_symbols["Hugo_Symbol"])
     ax_disease = ax[0][1].plot(counts_disease["Disease_lowest_level"], counts_disease["Count"])
-    ax_main = sns.heatmap(plot_data, ax=ax[1][1], square=False, vmin=0, cbar=True, cbar_kws={"shrink": .60})
+    ax_main = sns.heatmap(plot_data, ax=ax[1][1], square=False, vmin=0, cbar=False, cbar_kws={"shrink": .60})
 
     ax[0][1].set_xlim(xmin=0, xmax=len(counts_disease)-1)
     ax[1][0].set_ylim(ymin=0, ymax=len(counts_symbols)-1)
@@ -119,7 +119,7 @@ def plotting_normal(plot_data, counts_symbols, counts_disease, save=False, show=
     ax[1][1].xaxis.set_label_text('')
     ax[1][1].yaxis.tick_right()
 
-    plt.tight_layout()
+    f.tight_layout()
 
     ax[1][1].set_yticklabels(counts_symbols["Hugo_Symbol"], rotation=0, ha='left', fontsize=16)
     ax[1][1].set_xticklabels(counts_disease["Disease_lowest_level"], rotation=45, ha='right', fontsize=16)
@@ -127,12 +127,14 @@ def plotting_normal(plot_data, counts_symbols, counts_disease, save=False, show=
     ax[0][1].set_yticklabels([0,0,100,200,300,400,500,600], rotation=0, fontsize=16)
     ax[1][0].set_xticklabels([0,100,200,300,400], rotation=0, fontsize=16)
 
-    plt.delaxes(ax[0][0])
+    f.delaxes(ax[0][0])
 
     if save != False:
-        plt.savefig(save + extention + "heatmap_genes_matrix.png")
+        if not save.endswith("Figures/"):
+            save += "Figures/"
+        f.savefig(save + extention + "heatmap_genes_matrix.png")
     if show == True:
-        plt.show()
+        f.show()
     if show == False and save == False:
         warnings.warn('you are not checking the input data for media/supplements')
 
@@ -156,6 +158,8 @@ def plotting_cluster(plot_data, save=False, show=True, extention=""):
     ax.ax_heatmap.set_ylabel("")
 
     if save != False:
+        if not save.endswith("Figures/"):
+            save += "Figures/"
         plt.savefig(save + extention + "heatmap_genes_matrix.png")
     if show == True:
         plt.show()
@@ -230,6 +234,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     start = time.time()
-    heatmap_genes_matrix(meta_data=False, maf_data=False, Path_meta=args.Path, Path_maf=args.maf, Order=args.Data_ordering, level=args.disease_level, save=args.Save, show=str_to_bool(args.Show), Scale=args.Data_scaling)
+    heatmap_genes_matrix(meta_data=False, maf_data=False, Path_meta=args.Path, Path_maf=args.Maf, Order=args.Data_ordering, level=args.disease_level, save=args.Save, show=str_to_bool(args.Show), Scale=args.Data_scaling)
     end = time.time()
     print('completed in {} seconds'.format(end-start))

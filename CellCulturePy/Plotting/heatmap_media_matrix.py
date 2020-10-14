@@ -175,6 +175,8 @@ def plotting(heatmap_media, heatmap_supplements, Scale="log2", save=False, show=
     f.tight_layout()
 
     if save != False:
+        if not save.endswith("Figures/"):
+            save += "Figures/"
         plt.savefig(save + extention + "heatmap_media_matrix.png")
     if show == True:
         plt.show()
