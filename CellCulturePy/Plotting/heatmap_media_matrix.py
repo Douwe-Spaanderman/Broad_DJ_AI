@@ -151,25 +151,36 @@ def plotting(heatmap_media, heatmap_supplements, Scale="log2", save=False, show=
     else:
         warnings.warn(f'unrecognized scale was provided for plotting: {Scale}, therefore data has not been changed')
 
+    heatmap_media = heatmap_media.drop('Renal Cell Carcinoma Associated with Xp11.2 Translocations/TFE3 Gene Fusions (C27891)') 
+    heatmap_supplements = heatmap_supplements.drop('Renal Cell Carcinoma Associated with Xp11.2 Translocations/TFE3 Gene Fusions (C27891)') 
+
     width_ratio = len(heatmap_media.columns)/len(heatmap_supplements.columns)
 
     # Get a combined legend using the max value
     max_value = np.max([np.max(heatmap_media.values), np.max(heatmap_supplements.values)])
 
-    f, ax = plt.subplots(1, 2, figsize=(18, 18*width_ratio), gridspec_kw={'width_ratios': [width_ratio, 1]})
+    f, ax = plt.subplots(1, 2, figsize=(18, 12*width_ratio), gridspec_kw={'width_ratios': [width_ratio, 1]})
     media_plot = sns.heatmap(heatmap_media, ax=ax[0], square=False, vmin=0, vmax=max_value, cbar=False)
     suple_plot = sns.heatmap(heatmap_supplements, ax=ax[1], square=False, vmin=0, vmax=max_value, yticklabels=False)
 
+    media_plot.set_yticklabels(
+        list(heatmap_media.index),
+        horizontalalignment='right',
+        fontsize=11,
+    )
+
     media_plot.set_xticklabels(
         list(heatmap_media.columns), 
-        horizontalalignment='center',
-        fontsize=9,
+        rotation=45,
+        horizontalalignment='right',
+        fontsize=12,
     )
 
     suple_plot.set_xticklabels(
         list(heatmap_supplements.columns), 
-        horizontalalignment='center',
-        fontsize=9,
+        rotation=45,
+        horizontalalignment='right',
+        fontsize=12,
     )
 
     f.tight_layout()
@@ -177,7 +188,7 @@ def plotting(heatmap_media, heatmap_supplements, Scale="log2", save=False, show=
     if save != False:
         if not save.endswith("Figures/"):
             save += "Figures/"
-        plt.savefig(save + extention + "heatmap_media_matrix.png")
+        plt.savefig(save + extention + "heatmap_media_matrix.eps", format='eps')
     if show == True:
         plt.show()
     if show == False and save == False:
@@ -208,26 +219,26 @@ def heatmap_media_matrix(data, Path=False, Order="Occurence", Scale="log2", leve
     if Order == "Clustered":
         media_data = Cluster_order(media_data)
         supplement_data = Cluster_order(supplement_data)
-        plotting(media_data, supplement_data, save=save, show=show, extention="clustering_")
+        plotting(media_data, supplement_data, save=save, show=show, Scale=Scale, extention="clustering_")
     elif Order == "Occurence":
         media_data = Count_order(media_data)
         supplement_data = Count_order(supplement_data)
-        plotting(media_data, supplement_data, save=save, show=show, extention="occurence_")
+        plotting(media_data, supplement_data, save=save, show=show, Scale=Scale, extention="occurence_")
     elif Order == "Nothing":
-        plotting(media_data, supplement_data, save=save, show=show)
+        plotting(media_data, supplement_data, save=save, show=show, Scale=Scale)
     elif Order == "All":
         # Nothing
-        plotting(media_data, supplement_data, save=save, show=show)
+        plotting(media_data, supplement_data, save=save, show=show, Scale=Scale)
 
         #Count occurrences
         tmp_media_data = Count_order(media_data)
         tmp_supplement_data = Count_order(supplement_data)
-        plotting(tmp_media_data, tmp_supplement_data, save=save, show=show, extention="occurence_")
+        plotting(tmp_media_data, tmp_supplement_data, save=save, show=show, Scale=Scale, extention="occurence_")
 
         #Clustered occurrences
         tmp_media_data = Cluster_order(media_data)
         tmp_supplement_data = Cluster_order(supplement_data)
-        plotting(tmp_media_data, tmp_supplement_data, save=save, show=show, extention="clustering_")
+        plotting(tmp_media_data, tmp_supplement_data, save=save, show=show, Scale=Scale, extention="clustering_")
     else:
         raise KeyError(f"Wrong Order was provided: {Order}, please pick either Occurence, Clustered, Nothing, All.")
 

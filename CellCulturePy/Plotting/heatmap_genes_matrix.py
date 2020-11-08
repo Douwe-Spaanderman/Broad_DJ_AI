@@ -119,15 +119,17 @@ def plotting_normal(plot_data, counts_symbols, counts_disease, save=False, show=
     ax[1][1].xaxis.set_label_text('')
     ax[1][1].yaxis.tick_right()
 
-    f.tight_layout()
-
     ax[1][1].set_yticklabels(counts_symbols["Hugo_Symbol"], rotation=0, ha='left', fontsize=16)
-    ax[1][1].set_xticklabels(counts_disease["Disease_lowest_level"], rotation=45, ha='right', fontsize=16)
+    ax[1][1].set_xticklabels(counts_disease["Disease_lowest_level"], rotation=90, ha='right', fontsize=16)
 
     ax[0][1].set_yticklabels([0,0,100,200,300,400,500,600], rotation=0, fontsize=16)
     ax[1][0].set_xticklabels([0,100,200,300,400], rotation=0, fontsize=16)
 
     f.delaxes(ax[0][0])
+    
+
+    f.tight_layout()
+    ax[1][1].set_xticklabels(counts_disease["Disease_lowest_level"], rotation=45, ha='right', fontsize=16)
 
     if save != False:
         if not save.endswith("Figures/"):

@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 import pickle5 as pickle
+import argparse
+import time
 import json
 import os
 from sklearn.tree import export_graphviz
@@ -40,7 +42,7 @@ def treeplotting(model, cache=False, Path=False, save=False, show=True):
             data = data["cache_all"] + data["cache_media"]
 
     dotfile = open("tree.dot", 'w')
-    tree.export_graphviz(rf.estimators_[0], out_file = dotfile, feature_names = np.asarray(data))
+    tree.export_graphviz(model.estimators_[0], out_file = dotfile, feature_names = np.asarray(data), filled = True, max_depth=12, label='all', impurity=False, precision=2, leaves_parallel=False, rotate=False)
     dotfile.close()
 
     if save != False:
@@ -50,9 +52,14 @@ def treeplotting(model, cache=False, Path=False, save=False, show=True):
         if not save.endswith(".png"):
             save = save + "TreeFig.png"
 
-        os.system(f'dot -Tpng tree.dot -o t {save}')
+        os.system(f'dot -Tpng tree.dot -o {save}')
 
     os.system('rm tree.dot')
+
+    fig, axes = plt.subplots(nrows = 1,ncols = 1,figsize = (4,4), dpi=800)
+    tree.plot_tree(model.estimators_[0],
+                   feature_names = np.asarray(data));
+    fig.savefig(f'{save}.png')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Plot a descision tree from random forest")
@@ -64,6 +71,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     start = time.time()
     print(bool(args.Show))
-    Prediction_plotting(model=False, cache=args.Cache, Path=args.Path, save=args.Save, show=str_to_bool(args.Show))
+    treeplotting(model=False, cache=args.Cache, Path=args.Path, save=args.Save, show=str_to_bool(args.Show))
     end = time.time()
     print('completed in {} seconds'.format(end-start))
