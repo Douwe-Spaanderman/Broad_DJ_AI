@@ -2,4 +2,7 @@
 Machine Learning for media prediction
 
 # Workflow
-![Image of workflow](https://github.com/Douwe-Spaanderman/Broad_DJ_AI/ML_workflows.png)
+![Image of workflow](https://github.com/Douwe-Spaanderman/Broad_DJ_AI/blob/master/ML_workflows.png)
+
+# Setup
+Will be updated
